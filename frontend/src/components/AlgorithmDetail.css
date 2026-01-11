@@ -1,0 +1,267 @@
+.algorithm-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.error-page {
+  text-align: center;
+  padding: 3rem;
+}
+
+.error-page h2 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.error-page p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+/* Header */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.back-arrow {
+  font-size: 1.2em;
+}
+
+.share-btn {
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.share-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Content */
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detail-title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.meta-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.category-badge {
+  padding: 0.35rem 0.75rem;
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.difficulty-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.difficulty-beginner {
+  background: rgba(0, 200, 83, 0.15);
+  color: #00c853;
+}
+
+.difficulty-intermediate {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.difficulty-advanced {
+  background: rgba(255, 82, 82, 0.15);
+  color: #ff5252;
+}
+
+/* Tags */
+.tags-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-link {
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.tag-link:hover {
+  background: var(--bg-secondary);
+  color: var(--accent);
+}
+
+/* Sections */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.description {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Use cases */
+.use-cases {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.use-cases li {
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.use-cases li::before {
+  content: '>';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+/* Code block */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.code-block pre {
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+/* Complexity */
+.complexity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.complexity-item {
+  display: flex;
+  gap: 1rem;
+}
+
+.complexity-label {
+  color: var(--accent);
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.complexity-value {
+  color: var(--text-secondary);
+}
+
+/* AoC Examples */
+.aoc-examples {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.aoc-examples li {
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.aoc-examples li::before {
+  content: '*';
+  position: absolute;
+  left: 0;
+  color: var(--success);
+}
+
+/* Resources */
+.resources {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.resources li a {
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.resources li a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .detail-title {
+    font-size: 1.5rem;
+  }
+
+  .code-block {
+    padding: 1rem;
+    font-size: 0.8rem;
+  }
+}
