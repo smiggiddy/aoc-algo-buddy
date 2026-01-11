@@ -1,11 +1,20 @@
 # AoC Algo Buddy
 
-A web app to help developers learn common algorithms for solving Advent of Code problems. Features language-agnostic pseudo code, clean filtering, and shareable links.
+A collaborative web app to help developers learn common algorithms for solving Advent of Code problems. Features language-agnostic pseudo code, visual examples, community contributions, and shareable links.
 
 ## Tech Stack
 
-- **Backend**: Go (standard library)
+- **Backend**: Go (standard library + JSON file storage)
 - **Frontend**: React + Vite
+
+## Features
+
+- **Visual Examples**: Each algorithm includes step-by-step visualizations with ASCII diagrams
+- **Community Contributions**: Anyone can submit new algorithms (with CAPTCHA protection)
+- **Admin Review**: Submissions require approval before publishing
+- **Search & Filter**: Full-text search, filter by category/difficulty/tags
+- **Shareable URLs**: Every page has a unique, shareable URL
+- **Language Agnostic**: All implementations in pseudo code
 
 ## Getting Started
 
@@ -37,53 +46,82 @@ The app will be available at `http://localhost:5173`
 
 ### Production Build
 
-1. **Build the frontend**:
-
 ```bash
-cd frontend
-npm run build
+cd frontend && npm run build
+cd ../backend && go run .
 ```
 
-This outputs to `backend/static/`
+The full app is served at `http://localhost:8080`
 
-2. **Run the server**:
+### Environment Variables
 
-```bash
-cd backend
-go run .
-```
-
-The full app is now served at `http://localhost:8080`
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `8080` | Server port |
+| `ADMIN_USER` | `admin` | Admin username |
+| `ADMIN_PASS` | `changeme` | Admin password |
 
 ## API Endpoints
 
+### Public
+
 | Endpoint | Description |
 |----------|-------------|
-| `GET /api/algorithms` | List all algorithms (supports `?category`, `?tag`, `?difficulty`, `?search`) |
+| `GET /api/algorithms` | List approved algorithms (supports `?category`, `?tag`, `?difficulty`, `?search`) |
 | `GET /api/algorithms/:id` | Get single algorithm by ID |
 | `GET /api/categories` | List all categories |
 | `GET /api/tags` | List all tags |
+| `GET /api/captcha` | Get a new CAPTCHA challenge |
+| `POST /api/submit` | Submit a new algorithm for review |
 
-## Features
+### Admin (Basic Auth required)
 
-- **Search**: Full-text search across names, descriptions, and tags
-- **Filtering**: Filter by category, difficulty level, or specific tags
-- **Shareable URLs**: Every filter state and algorithm page has a unique URL
-- **Pseudo Code**: Language-agnostic implementations with complexity analysis
-- **AoC Examples**: Real Advent of Code problems where each algorithm applies
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/admin/submissions` | List pending submissions |
+| `POST /api/admin/approve/:id` | Approve a submission |
+| `POST /api/admin/reject/:id` | Reject a submission |
 
-## Adding Algorithms
+## Contributing Algorithms
 
-Edit `backend/data.go` to add new algorithms. Each algorithm includes:
+### Via Web UI
+
+1. Click "Contribute" in the header
+2. Fill in the algorithm details
+3. Complete the CAPTCHA
+4. Submit for review
+
+### Via Code
+
+Edit `backend/data.go` to add new seed algorithms. Each algorithm includes:
 
 - Name and ID (URL slug)
 - Category and tags
-- Difficulty level
+- Difficulty level (Beginner/Intermediate/Advanced)
 - Description and when to use
 - Pseudo code implementation
 - Time and space complexity
+- Visual examples with step-by-step breakdowns
 - AoC example problems
 - External resources
+
+## Data Storage
+
+Algorithms are stored in `backend/data.json` which is automatically created on first run. This file contains:
+
+- All approved algorithms
+- Pending/reviewed submissions
+
+To reset to seed data, delete `data.json` and restart the server.
+
+## Algorithms Included
+
+- **Graph**: BFS, DFS, Dijkstra, Flood Fill
+- **Dynamic Programming**: Memoization, Sliding Window
+- **Search**: Binary Search, Backtracking
+- **Math**: GCD/LCM, Cycle Detection
+- **Data Structures**: Priority Queue, Union-Find
+- **Geometry**: Manhattan Distance
 
 ## License
 

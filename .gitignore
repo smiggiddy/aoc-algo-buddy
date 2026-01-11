@@ -25,3 +25,6 @@ npm-debug.log*
 
 # Go
 backend/backend
+
+# Runtime data
+backend/data.json

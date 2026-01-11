@@ -135,6 +135,50 @@ function AlgorithmDetail() {
           </section>
         )}
 
+        {algorithm.examples && algorithm.examples.length > 0 && (
+          <section className="section examples-section">
+            <h2 className="section-title">Interactive Examples</h2>
+            {algorithm.examples.map((example, i) => (
+              <div key={i} className="example-card">
+                <h3 className="example-title">{example.title}</h3>
+                <p className="example-description">{example.description}</p>
+
+                <div className="example-io">
+                  <div className="io-block">
+                    <span className="io-label">Input:</span>
+                    <pre className="io-content">{example.input}</pre>
+                  </div>
+                  <div className="io-block">
+                    <span className="io-label">Output:</span>
+                    <pre className="io-content">{example.output}</pre>
+                  </div>
+                </div>
+
+                {example.visual && (
+                  <div className="visual-block">
+                    <span className="visual-label">Visualization:</span>
+                    <pre className="visual-content">{example.visual}</pre>
+                  </div>
+                )}
+
+                {example.steps && example.steps.length > 0 && (
+                  <div className="steps-block">
+                    <span className="steps-label">Step by Step:</span>
+                    <ol className="steps-list">
+                      {example.steps.map((step, j) => (
+                        <li key={j} className="step-item">
+                          <span className="step-desc">{step.description}</span>
+                          <code className="step-state">{step.state}</code>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+            ))}
+          </section>
+        )}
+
         {algorithm.resources && algorithm.resources.length > 0 && (
           <section className="section">
             <h2 className="section-title">Resources</h2>

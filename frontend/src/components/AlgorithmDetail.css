@@ -255,6 +255,139 @@
   text-decoration: underline;
 }
 
+/* Examples Section */
+.examples-section {
+  margin-top: 1rem;
+}
+
+.example-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.example-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.example-description {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.example-io {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.io-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.io-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.io-content {
+  background: var(--bg-tertiary);
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  overflow-x: auto;
+}
+
+.visual-block {
+  margin-top: 1rem;
+}
+
+.visual-label {
+  display: block;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.visual-content {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  color: var(--text-primary);
+  white-space: pre;
+}
+
+.steps-block {
+  margin-top: 1rem;
+}
+
+.steps-label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.steps-list {
+  list-style: none;
+  counter-reset: step;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.step-item::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-desc {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.step-state {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
 @media (max-width: 768px) {
   .detail-title {
     font-size: 1.5rem;
@@ -263,5 +396,14 @@
   .code-block {
     padding: 1rem;
     font-size: 0.8rem;
+  }
+
+  .example-io {
+    grid-template-columns: 1fr;
+  }
+
+  .visual-content {
+    font-size: 0.7rem;
+    padding: 1rem;
   }
 }
