@@ -107,27 +107,17 @@ func init() {
 		captchas: make(map[string]CaptchaChallenge),
 	}
 
-	if err := db.Load(); err != nil {
-		log.Printf("No existing data, loading seed data: %v", err)
-		// Try to load from seed file first
-		if seedData, seedErr := os.ReadFile("seed_data.json"); seedErr == nil {
-			var seedAlgos []Algorithm
-			if jsonErr := json.Unmarshal(seedData, &seedAlgos); jsonErr == nil {
-				db.Algorithms = seedAlgos
-				log.Printf("Loaded %d algorithms from seed_data.json", len(seedAlgos))
-			} else {
-				log.Printf("Failed to parse seed_data.json: %v, using built-in", jsonErr)
-				db.Algorithms = loadAlgorithms()
-			}
-		} else {
-			db.Algorithms = loadAlgorithms()
-		}
-		// Mark all seeded algorithms as approved
-		for i := range db.Algorithms {
-			db.Algorithms[i].Approved = true
-			db.Algorithms[i].CreatedAt = time.Now()
-		}
-		db.Save()
+	// Check if reseed is requested via env var
+	reseed := os.Getenv("RESEED") == "true" || os.Getenv("RESEED") == "1"
+
+	if reseed {
+		log.Println("RESEED=true: Rebuilding database from seed_data.json")
+		loadFromSeed(db)
+	} else if err := db.Load(); err != nil {
+		log.Printf("No existing data.json, loading from seed_data.json: %v", err)
+		loadFromSeed(db)
+	} else {
+		log.Printf("Loaded %d algorithms from data.json", len(db.Algorithms))
 	}
 
 	// Clean up expired captchas periodically
@@ -137,6 +127,27 @@ func init() {
 			db.cleanExpiredCaptchas()
 		}
 	}()
+}
+
+func loadFromSeed(d *Database) {
+	seedData, err := os.ReadFile("seed_data.json")
+	if err != nil {
+		log.Fatalf("Failed to read seed_data.json: %v", err)
+	}
+	var seedAlgos []Algorithm
+	if err := json.Unmarshal(seedData, &seedAlgos); err != nil {
+		log.Fatalf("Failed to parse seed_data.json: %v", err)
+	}
+	d.Algorithms = seedAlgos
+	d.Submissions = []Submission{} // Reset submissions on reseed
+	log.Printf("Loaded %d algorithms from seed_data.json", len(seedAlgos))
+
+	// Mark all seeded algorithms as approved
+	for i := range d.Algorithms {
+		d.Algorithms[i].Approved = true
+		d.Algorithms[i].CreatedAt = time.Now()
+	}
+	d.Save()
 }
 
 func (d *Database) Load() error {
