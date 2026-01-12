@@ -19,21 +19,26 @@ import (
 
 // Algorithm represents an algorithm entry
 type Algorithm struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Category    string    `json:"category"`
-	Tags        []string  `json:"tags"`
-	Difficulty  string    `json:"difficulty"`
-	Description string    `json:"description"`
-	WhenToUse   []string  `json:"whenToUse"`
-	PseudoCode  string    `json:"pseudoCode"`
-	Complexity  Complexity `json:"complexity"`
-	AoCExamples []string  `json:"aocExamples"`
-	Resources   []string  `json:"resources"`
-	Examples    []Example `json:"examples"`
-	Approved    bool      `json:"approved"`
-	CreatedAt   time.Time `json:"createdAt"`
-	SubmittedBy string    `json:"submittedBy,omitempty"`
+	ID               string     `json:"id"`
+	Name             string     `json:"name"`
+	Category         string     `json:"category"`
+	Tags             []string   `json:"tags"`
+	Difficulty       string     `json:"difficulty"`
+	Description      string     `json:"description"`
+	WhenToUse        []string   `json:"whenToUse"`
+	PseudoCode       string     `json:"pseudoCode"`
+	Complexity       Complexity `json:"complexity"`
+	AoCExamples      []string   `json:"aocExamples"`
+	Resources        []string   `json:"resources"`
+	Examples         []Example  `json:"examples"`
+	Prerequisites    []string   `json:"prerequisites,omitempty"`
+	KeyInsight       string     `json:"keyInsight,omitempty"`
+	CommonPitfalls   []string   `json:"commonPitfalls,omitempty"`
+	RelatedAlgos     []string   `json:"relatedAlgos,omitempty"`
+	RecognitionHints []string   `json:"recognitionHints,omitempty"`
+	Approved         bool       `json:"approved"`
+	CreatedAt        time.Time  `json:"createdAt"`
+	SubmittedBy      string     `json:"submittedBy,omitempty"`
 }
 
 type Complexity struct {
@@ -103,8 +108,20 @@ func init() {
 	}
 
 	if err := db.Load(); err != nil {
-		log.Printf("No existing data, seeding with defaults: %v", err)
-		db.Algorithms = loadAlgorithms()
+		log.Printf("No existing data, loading seed data: %v", err)
+		// Try to load from seed file first
+		if seedData, seedErr := os.ReadFile("seed_data.json"); seedErr == nil {
+			var seedAlgos []Algorithm
+			if jsonErr := json.Unmarshal(seedData, &seedAlgos); jsonErr == nil {
+				db.Algorithms = seedAlgos
+				log.Printf("Loaded %d algorithms from seed_data.json", len(seedAlgos))
+			} else {
+				log.Printf("Failed to parse seed_data.json: %v, using built-in", jsonErr)
+				db.Algorithms = loadAlgorithms()
+			}
+		} else {
+			db.Algorithms = loadAlgorithms()
+		}
 		// Mark all seeded algorithms as approved
 		for i := range db.Algorithms {
 			db.Algorithms[i].Approved = true
