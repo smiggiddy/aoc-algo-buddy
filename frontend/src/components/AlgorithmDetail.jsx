@@ -94,6 +94,27 @@ function AlgorithmDetail() {
           <p className="description">{algorithm.description}</p>
         </section>
 
+        {algorithm.keyInsight && (
+          <section className="section key-insight-section">
+            <h2 className="section-title">Key Insight</h2>
+            <div className="key-insight">
+              <span className="insight-icon">💡</span>
+              <p>{algorithm.keyInsight}</p>
+            </div>
+          </section>
+        )}
+
+        {algorithm.recognitionHints && algorithm.recognitionHints.length > 0 && (
+          <section className="section">
+            <h2 className="section-title">How to Recognize</h2>
+            <ul className="recognition-hints">
+              {algorithm.recognitionHints.map((hint, i) => (
+                <li key={i}>{hint}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <section className="section">
           <h2 className="section-title">When to Use</h2>
           <ul className="use-cases">
@@ -123,6 +144,46 @@ function AlgorithmDetail() {
             </div>
           </div>
         </section>
+
+        {algorithm.commonPitfalls && algorithm.commonPitfalls.length > 0 && (
+          <section className="section pitfalls-section">
+            <h2 className="section-title">Common Pitfalls</h2>
+            <ul className="pitfalls-list">
+              {algorithm.commonPitfalls.map((pitfall, i) => (
+                <li key={i}>
+                  <span className="pitfall-icon">⚠️</span>
+                  {pitfall}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {algorithm.prerequisites && algorithm.prerequisites.length > 0 && (
+          <section className="section">
+            <h2 className="section-title">Prerequisites</h2>
+            <div className="related-links">
+              {algorithm.prerequisites.map((prereq, i) => (
+                <Link key={i} to={`/algorithm/${prereq}`} className="related-link">
+                  {prereq}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {algorithm.relatedAlgos && algorithm.relatedAlgos.length > 0 && (
+          <section className="section">
+            <h2 className="section-title">Related Algorithms</h2>
+            <div className="related-links">
+              {algorithm.relatedAlgos.map((related, i) => (
+                <Link key={i} to={`/algorithm/${related}`} className="related-link">
+                  {related}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {algorithm.aocExamples && algorithm.aocExamples.length > 0 && (
           <section className="section">

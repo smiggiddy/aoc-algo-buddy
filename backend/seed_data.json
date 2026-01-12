@@ -1,0 +1,1057 @@
+[
+  {
+    "id": "bfs",
+    "name": "Breadth-First Search (BFS)",
+    "category": "Graph Traversal",
+    "tags": ["traversal", "shortest-path", "grid", "maze", "level-order"],
+    "difficulty": "Beginner",
+    "description": "Explores all neighbors at the current depth before moving to nodes at the next depth level. Guarantees the shortest path in unweighted graphs.",
+    "whenToUse": [
+      "Finding shortest path in unweighted graphs or grids",
+      "Level-order traversal",
+      "Finding all nodes within a certain distance",
+      "Flood fill algorithms"
+    ],
+    "pseudoCode": "function BFS(start, goal):\n    queue = new Queue()\n    visited = new Set()\n    \n    queue.enqueue(start)\n    visited.add(start)\n    \n    while queue is not empty:\n        current = queue.dequeue()\n        \n        if current == goal:\n            return SUCCESS\n        \n        for each neighbor of current:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.enqueue(neighbor)\n    \n    return NOT_FOUND",
+    "complexity": {"time": "O(V + E)", "space": "O(V)"},
+    "aocExamples": ["2022 Day 12 - Hill Climbing", "2016 Day 13 - Maze", "2019 Day 15 - Oxygen System"],
+    "resources": ["https://en.wikipedia.org/wiki/Breadth-first_search"],
+    "prerequisites": [],
+    "keyInsight": "BFS explores in 'waves' - all nodes at distance N are visited before any node at distance N+1. This is why it finds shortest paths.",
+    "commonPitfalls": [
+      "Forgetting to mark nodes as visited BEFORE adding to queue (causes duplicates)",
+      "Using BFS when edges have different weights (use Dijkstra instead)",
+      "Not tracking the path when you need to reconstruct it"
+    ],
+    "relatedAlgos": ["dfs", "dijkstra", "a-star"],
+    "recognitionHints": [
+      "Problem asks for 'shortest path' or 'minimum steps' in unweighted graph",
+      "Grid puzzle where all moves cost the same",
+      "Need to find all nodes at exactly distance K"
+    ],
+    "examples": [{
+      "title": "Shortest Path in Grid",
+      "description": "Find shortest path from S to E",
+      "input": "S . . #\n. # . .\n. . . E",
+      "output": "6 steps",
+      "visual": "BFS explores in waves:\n\n  Step 0:    Step 1:    Step 2:    Final:\n  S . . #    0 1 . #    0 1 2 #    0 1 2 #\n  . # . .    1 # . .    1 # 3 .    1 # 3 4\n  . . . E    . . . E    2 . . E    2 3 4 5",
+      "steps": [
+        {"description": "Start at S, distance 0", "state": "Queue: [S]"},
+        {"description": "Visit neighbors at distance 1", "state": "Queue: [(0,1), (1,0)]"},
+        {"description": "Continue until E reached", "state": "Found E at distance 6"}
+      ]
+    }]
+  },
+  {
+    "id": "dfs",
+    "name": "Depth-First Search (DFS)",
+    "category": "Graph Traversal",
+    "tags": ["traversal", "recursion", "backtracking", "cycle-detection"],
+    "difficulty": "Beginner",
+    "description": "Explores as far as possible along each branch before backtracking. Uses stack (or recursion). Good for exhaustive search.",
+    "whenToUse": [
+      "Detecting cycles in graphs",
+      "Topological sorting",
+      "Finding connected components",
+      "Solving puzzles with backtracking",
+      "Path existence (not shortest)"
+    ],
+    "pseudoCode": "function DFS(node, visited):\n    if node in visited:\n        return\n    \n    visited.add(node)\n    process(node)\n    \n    for each neighbor of node:\n        DFS(neighbor, visited)\n\n# Iterative version:\nfunction DFS_iterative(start):\n    stack = [start]\n    visited = new Set()\n    \n    while stack not empty:\n        current = stack.pop()\n        if current in visited:\n            continue\n        visited.add(current)\n        process(current)\n        for neighbor in current.neighbors:\n            stack.push(neighbor)",
+    "complexity": {"time": "O(V + E)", "space": "O(V) for recursion stack"},
+    "aocExamples": ["2021 Day 12 - Passage Pathing", "2022 Day 7 - Directory Sizes", "2019 Day 6 - Orbit Map"],
+    "resources": ["https://en.wikipedia.org/wiki/Depth-first_search"],
+    "prerequisites": [],
+    "keyInsight": "DFS goes deep before wide. The recursion stack naturally handles backtracking.",
+    "commonPitfalls": [
+      "Stack overflow on deep graphs - use iterative version",
+      "Using DFS for shortest path (it finds A path, not shortest)",
+      "Forgetting to mark visited before recursing (infinite loops)"
+    ],
+    "relatedAlgos": ["bfs", "backtracking", "topological-sort"],
+    "recognitionHints": [
+      "Need to explore ALL paths or possibilities",
+      "Looking for ANY path, not shortest",
+      "Tree/graph traversal with natural recursive structure",
+      "Cycle detection needed"
+    ],
+    "examples": [{
+      "title": "Tree Traversal",
+      "description": "Visit all nodes in tree",
+      "input": "Tree: A->(B,C), B->(D,E)",
+      "output": "A, B, D, E, C",
+      "visual": "DFS goes deep first:\n\n      A           Visit: A\n     / \\          Visit: B (go deep)\n    B   C         Visit: D (deeper)\n   / \\            Visit: E (sibling)\n  D   E           Visit: C (backtrack to A)",
+      "steps": [
+        {"description": "Start at A", "state": "Stack: [A]"},
+        {"description": "Visit A, push B, C", "state": "Stack: [C, B]"},
+        {"description": "Visit B, push D, E", "state": "Stack: [C, E, D]"},
+        {"description": "Visit D, E, then C", "state": "Done"}
+      ]
+    }]
+  },
+  {
+    "id": "dijkstra",
+    "name": "Dijkstra's Algorithm",
+    "category": "Shortest Path",
+    "tags": ["shortest-path", "weighted-graph", "priority-queue", "greedy"],
+    "difficulty": "Intermediate",
+    "description": "Finds shortest path in weighted graphs with non-negative edges. Uses priority queue to always process closest unvisited node.",
+    "whenToUse": [
+      "Shortest path with varying edge weights",
+      "Grid with different movement costs",
+      "When you need optimal path, not just any path"
+    ],
+    "pseudoCode": "function Dijkstra(graph, start, goal):\n    dist = {node: infinity for all nodes}\n    dist[start] = 0\n    pq = PriorityQueue()\n    pq.push((0, start))\n    \n    while pq not empty:\n        d, current = pq.pop_min()\n        \n        if current == goal:\n            return d\n        \n        if d > dist[current]:\n            continue  # Already found better\n        \n        for neighbor, weight in graph[current]:\n            new_dist = dist[current] + weight\n            if new_dist < dist[neighbor]:\n                dist[neighbor] = new_dist\n                pq.push((new_dist, neighbor))\n    \n    return dist",
+    "complexity": {"time": "O((V + E) log V)", "space": "O(V)"},
+    "aocExamples": ["2021 Day 15 - Chiton", "2023 Day 17 - Crucible", "2022 Day 24 - Blizzard"],
+    "resources": ["https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"],
+    "prerequisites": ["bfs", "priority-queue"],
+    "keyInsight": "Greedy choice: always expand the node with smallest known distance. This works because all edges are non-negative.",
+    "commonPitfalls": [
+      "Using with negative edge weights (use Bellman-Ford instead)",
+      "Not using 'continue' optimization for already-processed nodes",
+      "Confusing with BFS - Dijkstra needs priority queue, not regular queue"
+    ],
+    "relatedAlgos": ["bfs", "a-star", "bellman-ford"],
+    "recognitionHints": [
+      "Shortest path with different costs per edge/cell",
+      "Grid where movement costs vary",
+      "'Minimum cost to reach' problems"
+    ],
+    "examples": [{
+      "title": "Weighted Grid",
+      "description": "Find lowest cost path",
+      "input": "1 3 1\n1 5 1\n4 2 1",
+      "output": "Cost: 7",
+      "visual": "Process by minimum distance:\n\nGrid:     Distances:    Path:\n1 3 1     0 3 4         * - *\n1 5 1  -> 1 6 5      -> *   *\n4 2 1     5 3 4           * *",
+      "steps": [
+        {"description": "Start (0,0)=0", "state": "PQ: [(0, (0,0))]"},
+        {"description": "Expand to neighbors", "state": "PQ: [(1,(1,0)), (3,(0,1))]"},
+        {"description": "Always pick minimum", "state": "Process (1,0) next"},
+        {"description": "Continue until goal", "state": "Goal reached, cost=7"}
+      ]
+    }]
+  },
+  {
+    "id": "a-star",
+    "name": "A* Search",
+    "category": "Shortest Path",
+    "tags": ["shortest-path", "heuristic", "pathfinding", "informed-search"],
+    "difficulty": "Intermediate",
+    "description": "Dijkstra + heuristic. Uses f(n) = g(n) + h(n) where g is cost so far and h estimates cost to goal. Faster than Dijkstra when good heuristic available.",
+    "whenToUse": [
+      "Pathfinding when goal location is known",
+      "When you can estimate distance to goal",
+      "Need Dijkstra but faster"
+    ],
+    "pseudoCode": "function AStar(start, goal, h):\n    # h(n) = heuristic estimate from n to goal\n    g = {start: 0}  # Cost from start\n    f = {start: h(start)}  # g + h\n    pq = PriorityQueue()\n    pq.push((f[start], start))\n    \n    while pq not empty:\n        _, current = pq.pop_min()\n        \n        if current == goal:\n            return g[goal]\n        \n        for neighbor, cost in graph[current]:\n            tentative_g = g[current] + cost\n            \n            if tentative_g < g.get(neighbor, infinity):\n                g[neighbor] = tentative_g\n                f[neighbor] = tentative_g + h(neighbor)\n                pq.push((f[neighbor], neighbor))\n    \n    return NOT_FOUND",
+    "complexity": {"time": "O((V + E) log V) but explores fewer nodes", "space": "O(V)"},
+    "aocExamples": ["2023 Day 17 - Crucible (with state)", "2016 Day 11 - Elevator", "Any grid pathfinding"],
+    "resources": ["https://en.wikipedia.org/wiki/A*_search_algorithm"],
+    "prerequisites": ["dijkstra"],
+    "keyInsight": "The heuristic guides search toward goal. Must be admissible (never overestimate) to guarantee optimal path.",
+    "commonPitfalls": [
+      "Heuristic overestimates (not admissible) - won't find optimal",
+      "Forgetting h must be consistent for optimal reopening behavior",
+      "Using when no good heuristic exists (just use Dijkstra)"
+    ],
+    "relatedAlgos": ["dijkstra", "bfs"],
+    "recognitionHints": [
+      "Dijkstra problem but need it faster",
+      "Goal position is known (can compute distance estimate)",
+      "Grid with Manhattan distance as natural heuristic"
+    ],
+    "examples": [{
+      "title": "A* vs Dijkstra",
+      "description": "Pathfinding to known goal",
+      "input": "10x10 grid, start=(0,0), goal=(9,9)",
+      "output": "Same path, fewer nodes explored",
+      "visual": "Dijkstra explores:    A* with Manhattan h:\n. . . . . .          . . . . . .\n. . . . . .          . . . . . .\n. . . X . .    vs    . . . X . .\n. . . . . G          . . . . / G\n                         . . /\nExpands in circles      Expands toward goal",
+      "steps": [
+        {"description": "f(start) = 0 + h(start)", "state": "PQ: [(18, start)] h=manhattan"},
+        {"description": "Expand toward goal", "state": "Prefers nodes closer to goal"},
+        {"description": "Fewer expansions", "state": "~50% fewer nodes than Dijkstra"}
+      ]
+    }]
+  },
+  {
+    "id": "topological-sort",
+    "name": "Topological Sort",
+    "category": "Graph Algorithms",
+    "tags": ["dag", "ordering", "dependencies", "scheduling"],
+    "difficulty": "Intermediate",
+    "description": "Linear ordering of DAG vertices such that for every edge u→v, u comes before v. Essential for dependency resolution.",
+    "whenToUse": [
+      "Task scheduling with dependencies",
+      "Build systems (compile order)",
+      "Course prerequisites",
+      "Package dependency resolution"
+    ],
+    "pseudoCode": "# Kahn's Algorithm (BFS-based)\nfunction topological_sort(graph):\n    in_degree = count incoming edges for each node\n    queue = nodes with in_degree == 0\n    result = []\n    \n    while queue not empty:\n        node = queue.pop()\n        result.append(node)\n        \n        for neighbor in graph[node]:\n            in_degree[neighbor] -= 1\n            if in_degree[neighbor] == 0:\n                queue.append(neighbor)\n    \n    if len(result) != num_nodes:\n        return CYCLE_DETECTED\n    return result\n\n# DFS-based alternative\nfunction topo_dfs(graph):\n    visited = set()\n    result = []\n    \n    function dfs(node):\n        visited.add(node)\n        for neighbor in graph[node]:\n            if neighbor not in visited:\n                dfs(neighbor)\n        result.prepend(node)  # Add AFTER processing children\n    \n    for node in graph:\n        if node not in visited:\n            dfs(node)\n    return result",
+    "complexity": {"time": "O(V + E)", "space": "O(V)"},
+    "aocExamples": ["2019 Day 14 - Stoichiometry", "2020 Day 7 - Bag Rules", "Any dependency chain"],
+    "resources": ["https://en.wikipedia.org/wiki/Topological_sorting"],
+    "prerequisites": ["dfs", "bfs"],
+    "keyInsight": "In Kahn's: start with nodes having no dependencies. In DFS: add node to result AFTER all descendants processed.",
+    "commonPitfalls": [
+      "Applying to graph with cycles (only works on DAGs)",
+      "DFS version: adding to result before children (wrong order)",
+      "Not detecting cycles (result length != node count)"
+    ],
+    "relatedAlgos": ["dfs", "bfs"],
+    "recognitionHints": [
+      "Dependencies between items",
+      "'Must do X before Y' constraints",
+      "Ordering where some things must come first",
+      "Detect if dependency cycle exists"
+    ],
+    "examples": [{
+      "title": "Build Order",
+      "description": "Compile files with dependencies",
+      "input": "A->B, A->C, B->D, C->D",
+      "output": "A, B, C, D or A, C, B, D",
+      "visual": "Dependency graph:      Valid orderings:\n    A                  A must be first\n   / \\                 B,C can be either order\n  B   C                D must be last\n   \\ /\n    D                  [A,B,C,D] or [A,C,B,D]",
+      "steps": [
+        {"description": "Find nodes with in_degree=0", "state": "Queue: [A]"},
+        {"description": "Process A, decrement B,C", "state": "Queue: [B,C], Result: [A]"},
+        {"description": "Process B and C", "state": "Queue: [D], Result: [A,B,C]"},
+        {"description": "Process D", "state": "Result: [A,B,C,D]"}
+      ]
+    }]
+  },
+  {
+    "id": "memoization",
+    "name": "Memoization (Top-Down DP)",
+    "category": "Dynamic Programming",
+    "tags": ["recursion", "caching", "optimization", "dp"],
+    "difficulty": "Beginner",
+    "description": "Cache results of expensive function calls. Top-down approach: start with original problem, cache as you recurse.",
+    "whenToUse": [
+      "Recursive solutions with overlapping subproblems",
+      "When same computation happens multiple times",
+      "Natural recursive structure but exponential without caching"
+    ],
+    "pseudoCode": "memo = {}\n\nfunction solve(state):\n    if state in memo:\n        return memo[state]\n    \n    if is_base_case(state):\n        return base_value\n    \n    result = compute_from_subproblems(state)\n    memo[state] = result\n    return result",
+    "complexity": {"time": "Typically reduces exponential to polynomial", "space": "O(number of unique states)"},
+    "aocExamples": ["2023 Day 12 - Hot Springs", "2024 Day 19 - Linen Layout", "2020 Day 10 - Adapters"],
+    "resources": ["https://en.wikipedia.org/wiki/Memoization"],
+    "prerequisites": [],
+    "keyInsight": "The cache key (state) must capture everything that affects the result. Same state = same answer.",
+    "commonPitfalls": [
+      "Cache key missing important state (wrong answers)",
+      "Mutable state as cache key (unhashable or changes)",
+      "Not recognizing overlapping subproblems exist"
+    ],
+    "relatedAlgos": ["tabulation", "recursion"],
+    "recognitionHints": [
+      "Recursive solution is slow/times out",
+      "Same recursive calls happen repeatedly",
+      "State can be represented as tuple/string for hashing"
+    ],
+    "examples": [{
+      "title": "Fibonacci",
+      "description": "fib(n) with memoization",
+      "input": "n = 5",
+      "output": "5",
+      "visual": "Without memo:           With memo:\n     fib(5)              fib(5)\n    /      \\            /      \\\n fib(4)  fib(3)       fib(4)  [cached]\n  / \\      / \\         / \\\nfib(3)...            fib(3) [cached]\n\n15 calls              5 calls",
+      "steps": [
+        {"description": "Call fib(5)", "state": "memo: {}"},
+        {"description": "Recurse, cache results", "state": "memo: {0:0, 1:1, 2:1, 3:2, 4:3}"},
+        {"description": "fib(5) uses cached fib(4), fib(3)", "state": "memo[5] = 5"}
+      ]
+    }]
+  },
+  {
+    "id": "tabulation",
+    "name": "Tabulation (Bottom-Up DP)",
+    "category": "Dynamic Programming",
+    "tags": ["iteration", "table", "optimization", "dp"],
+    "difficulty": "Intermediate",
+    "description": "Build solution iteratively from smallest subproblems up. Fill a table in order so dependencies are always ready.",
+    "whenToUse": [
+      "When subproblem order is clear",
+      "Need to avoid recursion overhead/stack limits",
+      "Want to optimize space by only keeping recent rows"
+    ],
+    "pseudoCode": "function solve_tabulation(n):\n    # Create DP table\n    dp = array of size (n+1)\n    \n    # Base cases\n    dp[0] = base_value_0\n    dp[1] = base_value_1\n    \n    # Fill table in order\n    for i from 2 to n:\n        dp[i] = combine(dp[i-1], dp[i-2], ...)\n    \n    return dp[n]",
+    "complexity": {"time": "O(states * transition cost)", "space": "O(states), often reducible"},
+    "aocExamples": ["2020 Day 10 - Adapter Array", "2023 Day 12 - Hot Springs", "2021 Day 6 - Lanternfish"],
+    "resources": ["https://en.wikipedia.org/wiki/Dynamic_programming"],
+    "prerequisites": ["memoization"],
+    "keyInsight": "Unlike memoization, you must figure out the order to fill the table. Dependencies must be computed first.",
+    "commonPitfalls": [
+      "Wrong iteration order (using values not yet computed)",
+      "Off-by-one errors in table size or indices",
+      "Not recognizing when space can be optimized (rolling array)"
+    ],
+    "relatedAlgos": ["memoization"],
+    "recognitionHints": [
+      "Memoization works but hits stack limits",
+      "Clear ordering of subproblems (1D, 2D grid)",
+      "Need space optimization"
+    ],
+    "examples": [{
+      "title": "Fibonacci Tabulation",
+      "description": "fib(n) bottom-up",
+      "input": "n = 5",
+      "output": "5",
+      "visual": "Build table left to right:\n\ni:    0  1  2  3  4  5\ndp:  [0, 1, 1, 2, 3, 5]\n          ^  ^  ^  ^  ^\n          |  |  |  |  |\n         computed from previous\n\nSpace optimization: only need dp[i-1] and dp[i-2]\na, b = 0, 1\nfor i in range(n): a, b = b, a+b",
+      "steps": [
+        {"description": "Initialize base cases", "state": "dp = [0, 1, _, _, _, _]"},
+        {"description": "dp[2] = dp[1] + dp[0]", "state": "dp = [0, 1, 1, _, _, _]"},
+        {"description": "Continue filling", "state": "dp = [0, 1, 1, 2, 3, 5]"}
+      ]
+    }]
+  },
+  {
+    "id": "binary-search",
+    "name": "Binary Search",
+    "category": "Search Techniques",
+    "tags": ["sorted", "divide-conquer", "optimization", "monotonic"],
+    "difficulty": "Beginner",
+    "description": "Efficiently find target or boundary in sorted/monotonic data by halving search space each step.",
+    "whenToUse": [
+      "Searching in sorted array",
+      "Finding boundary where condition changes",
+      "'Binary search the answer' - minimize/maximize with monotonic check"
+    ],
+    "pseudoCode": "# Find exact value\nfunction binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = lo + (hi - lo) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\n# Find first True in [F,F,F,T,T,T]\nfunction binary_search_boundary(check):\n    lo, hi = 0, max_val\n    while lo < hi:\n        mid = lo + (hi - lo) // 2\n        if check(mid):\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo",
+    "complexity": {"time": "O(log n)", "space": "O(1)"},
+    "aocExamples": ["2021 Day 7 - Crab Fuel", "2022 Day 19 - Geodes (pruning)", "Many optimization problems"],
+    "resources": ["https://en.wikipedia.org/wiki/Binary_search_algorithm"],
+    "prerequisites": [],
+    "keyInsight": "Works whenever you can split the search space into 'yes' and 'no' regions with a clear boundary.",
+    "commonPitfalls": [
+      "Off-by-one: lo <= hi vs lo < hi depends on variant",
+      "Integer overflow: use lo + (hi-lo)/2 not (lo+hi)/2",
+      "Wrong boundary update: think carefully about mid+1 vs mid"
+    ],
+    "relatedAlgos": ["two-pointers", "ternary-search"],
+    "recognitionHints": [
+      "'Find minimum X such that...'",
+      "Sorted array lookup",
+      "Monotonic function - find where it crosses threshold",
+      "Problem has large search space but quick validity check"
+    ],
+    "examples": [{
+      "title": "Binary Search the Answer",
+      "description": "Find minimum fuel to align crabs",
+      "input": "Positions: [0,1,1,2,14], cost = |target - pos|",
+      "output": "Min fuel at position 2",
+      "visual": "Fuel cost by position:\npos:  0   1   2   3   ...  14\ncost: 20  14  10  12  ...  40\n              ^\n      Cost is roughly convex\n      Binary search finds minimum\n\nCheck: 'can we do it with cost <= X?'\n[F,F,F,T,T,T,T...] - find first T",
+      "steps": [
+        {"description": "lo=0, hi=14, mid=7", "state": "Check cost at 7"},
+        {"description": "Cost at 7 > optimal, adjust", "state": "Narrow range"},
+        {"description": "Converge to position 2", "state": "Minimum found"}
+      ]
+    }]
+  },
+  {
+    "id": "two-pointers",
+    "name": "Two Pointers",
+    "category": "Search Techniques",
+    "tags": ["array", "sorted", "optimization", "linear"],
+    "difficulty": "Beginner",
+    "description": "Use two pointers moving through data structure to solve problems in O(n) that might otherwise be O(n²).",
+    "whenToUse": [
+      "Finding pairs with certain sum in sorted array",
+      "Removing duplicates in-place",
+      "Merging sorted arrays",
+      "Palindrome checking"
+    ],
+    "pseudoCode": "# Two Sum in sorted array\nfunction two_sum_sorted(arr, target):\n    left, right = 0, len(arr) - 1\n    \n    while left < right:\n        sum = arr[left] + arr[right]\n        if sum == target:\n            return (left, right)\n        elif sum < target:\n            left += 1\n        else:\n            right -= 1\n    \n    return NOT_FOUND\n\n# Fast/slow pointer for cycle\nfunction has_cycle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow == fast:\n            return True\n    return False",
+    "complexity": {"time": "O(n)", "space": "O(1)"},
+    "aocExamples": ["2020 Day 1 - Expense Report", "Many array problems"],
+    "resources": ["https://en.wikipedia.org/wiki/Two_pointers_technique"],
+    "prerequisites": [],
+    "keyInsight": "By moving pointers based on current state, we avoid checking all pairs. One pass through the data.",
+    "commonPitfalls": [
+      "Forgetting array must be sorted for sum problems",
+      "Off-by-one when moving pointers",
+      "Not handling duplicates correctly"
+    ],
+    "relatedAlgos": ["binary-search", "sliding-window"],
+    "recognitionHints": [
+      "Finding pair/triplet with target sum",
+      "Sorted array with pair matching",
+      "In-place array manipulation",
+      "Two sequences to merge or compare"
+    ],
+    "examples": [{
+      "title": "Two Sum (Sorted)",
+      "description": "Find two numbers that add to target",
+      "input": "arr=[1,3,5,7,9], target=12",
+      "output": "indices (1,4): 3+9=12",
+      "visual": "Array: [1, 3, 5, 7, 9]  target=12\n        L           R    1+9=10 < 12, move L\n        \nArray: [1, 3, 5, 7, 9]\n           L        R    3+9=12 = 12, found!\n\nWhy it works:\n- Sum too small? Left value is smallest possible,\n  so move left pointer right (increase sum)\n- Sum too big? Move right pointer left (decrease)",
+      "steps": [
+        {"description": "L=0, R=4: 1+9=10 < 12", "state": "Move L right"},
+        {"description": "L=1, R=4: 3+9=12", "state": "Found!"}
+      ]
+    }]
+  },
+  {
+    "id": "state-space-bfs",
+    "name": "State Space BFS",
+    "category": "State Modeling",
+    "tags": ["bfs", "state", "encoding", "search"],
+    "difficulty": "Intermediate",
+    "description": "BFS where nodes are abstract states, not grid positions. Key skill: defining what state captures and how states connect.",
+    "whenToUse": [
+      "Puzzles with complex game states",
+      "When position alone isn't enough",
+      "Problems with multiple moving pieces",
+      "Minimum moves to transform X into Y"
+    ],
+    "pseudoCode": "# State = tuple capturing all relevant info\n# Example: (position, direction, steps_in_direction)\n\nfunction state_space_bfs(initial_state, is_goal):\n    queue = [(initial_state, 0)]  # state, distance\n    visited = {initial_state}\n    \n    while queue:\n        state, dist = queue.pop_front()\n        \n        if is_goal(state):\n            return dist\n        \n        for next_state in get_neighbors(state):\n            if next_state not in visited:\n                visited.add(next_state)\n                queue.append((next_state, dist + 1))\n    \n    return -1\n\n# Key: state must be hashable (tuple, not list)",
+    "complexity": {"time": "O(number of states)", "space": "O(number of states)"},
+    "aocExamples": ["2023 Day 17 - Crucible", "2016 Day 11 - Elevator", "2019 Day 18 - Keys"],
+    "resources": ["https://en.wikipedia.org/wiki/State_space_search"],
+    "prerequisites": ["bfs"],
+    "keyInsight": "State = everything that affects future decisions. Two situations with same state will have same optimal continuation.",
+    "commonPitfalls": [
+      "State missing important info (wrong answers)",
+      "State has too much info (too slow, memory issues)",
+      "Using unhashable types for state (lists instead of tuples)",
+      "Not recognizing problem as state-space search"
+    ],
+    "relatedAlgos": ["bfs", "dijkstra", "a-star"],
+    "recognitionHints": [
+      "Grid problem but 'direction matters' or 'history matters'",
+      "'Minimum moves to solve puzzle'",
+      "Multiple pieces/entities that affect each other",
+      "Can't just track (x,y), need more context"
+    ],
+    "examples": [{
+      "title": "Crucible (AoC 2023 Day 17)",
+      "description": "Can't go more than 3 steps in same direction",
+      "input": "Grid with costs, start top-left, end bottom-right",
+      "output": "Minimum cost path respecting movement rules",
+      "visual": "State = (row, col, direction, consecutive_steps)\n\nFrom state (2, 3, RIGHT, 2):\n  - Can go RIGHT: (2, 4, RIGHT, 3)\n  - Can go UP:    (1, 3, UP, 1)     ← reset count\n  - Can go DOWN:  (3, 3, DOWN, 1)   ← reset count\n  - Can NOT go RIGHT if consecutive=3\n  - Can NOT go LEFT (no 180° turns)\n\nDifferent states at same position:\n  (2, 3, RIGHT, 1) ≠ (2, 3, RIGHT, 3)\n  Second one has fewer options!",
+      "steps": [
+        {"description": "Define state tuple", "state": "(row, col, dir, consecutive)"},
+        {"description": "Generate valid next states", "state": "Check direction rules"},
+        {"description": "BFS/Dijkstra on state space", "state": "Visit states, not just positions"}
+      ]
+    }]
+  },
+  {
+    "id": "backtracking",
+    "name": "Backtracking",
+    "category": "Search Techniques",
+    "tags": ["recursion", "constraint", "exhaustive", "pruning"],
+    "difficulty": "Intermediate",
+    "description": "Systematically explore all solutions by building incrementally and abandoning paths that violate constraints.",
+    "whenToUse": [
+      "Constraint satisfaction (Sudoku, N-Queens)",
+      "Generating permutations/combinations",
+      "When you need ALL solutions",
+      "Puzzle solving"
+    ],
+    "pseudoCode": "function backtrack(state, choices):\n    if is_complete(state):\n        record_solution(state)\n        return\n    \n    for choice in choices:\n        if is_valid(state, choice):\n            apply(state, choice)\n            backtrack(state, remaining_choices)\n            undo(state, choice)  # BACKTRACK\n\n# With pruning\nfunction backtrack_pruned(state, best_so_far):\n    if cannot_beat(state, best_so_far):\n        return  # PRUNE - don't explore further\n    ...",
+    "complexity": {"time": "O(b^d) worst case, but pruning helps", "space": "O(d) recursion depth"},
+    "aocExamples": ["2023 Day 12 - Hot Springs", "2020 Day 21 - Allergens", "2022 Day 19 - Geodes"],
+    "resources": ["https://en.wikipedia.org/wiki/Backtracking"],
+    "prerequisites": ["dfs"],
+    "keyInsight": "Undo (backtrack) is essential - restore state before trying next choice. Pruning eliminates impossible branches early.",
+    "commonPitfalls": [
+      "Forgetting to undo changes (state corruption)",
+      "Not pruning enough (too slow)",
+      "Pruning too aggressively (missing solutions)"
+    ],
+    "relatedAlgos": ["dfs", "memoization"],
+    "recognitionHints": [
+      "Find all ways to arrange/assign",
+      "Constraint satisfaction",
+      "'Generate all valid X'",
+      "Choices with constraints"
+    ],
+    "examples": [{
+      "title": "N-Queens",
+      "description": "Place N queens on NxN board, none attacking",
+      "input": "N = 4",
+      "output": "2 solutions",
+      "visual": "Backtracking tree:\n\nRow 0: try col 0    try col 1    ...\n         |            |\n       Q . . .      . Q . .\n       Row 1:       Row 1:\n       conflicts!   try col 3\n       BACKTRACK      |\n                   . Q . .\n                   . . . Q\n                   Row 2: try col 0\n                     |\n                   Q . . .  ← attacks Q in col 1\n                   BACKTRACK",
+      "steps": [
+        {"description": "Place Q in row 0, col 0", "state": "Q..."},
+        {"description": "Row 1: all positions attacked", "state": "Backtrack!"},
+        {"description": "Try col 1 for row 0", "state": ".Q.."},
+        {"description": "Continue with valid placements", "state": "..."}
+      ]
+    }]
+  },
+  {
+    "id": "cycle-detection",
+    "name": "Cycle Detection",
+    "category": "Optimization Patterns",
+    "tags": ["simulation", "optimization", "repetition", "state"],
+    "difficulty": "Intermediate",
+    "description": "Detect when a sequence repeats, then extrapolate to huge iteration counts without simulating every step.",
+    "whenToUse": [
+      "Problem says 'repeat 1 billion times'",
+      "Simulation that's too slow to run fully",
+      "Finding when patterns repeat"
+    ],
+    "pseudoCode": "function solve_with_cycle(initial, target_iterations):\n    seen = {}  # state -> iteration number\n    states = [initial]\n    current = initial\n    \n    for i in range(target_iterations):\n        state_key = hash(current)\n        \n        if state_key in seen:\n            cycle_start = seen[state_key]\n            cycle_length = i - cycle_start\n            \n            remaining = (target_iterations - cycle_start) % cycle_length\n            return states[cycle_start + remaining]\n        \n        seen[state_key] = i\n        states.append(current)\n        current = next_state(current)\n    \n    return current",
+    "complexity": {"time": "O(cycle_start + cycle_length)", "space": "O(states until cycle)"},
+    "aocExamples": ["2023 Day 14 - Reflector Dish", "2022 Day 17 - Tetris", "2019 Day 12 - N-Body"],
+    "resources": ["https://en.wikipedia.org/wiki/Cycle_detection"],
+    "prerequisites": ["memoization"],
+    "keyInsight": "Same state = same future. Once you see a repeat, you know the pattern will continue forever.",
+    "commonPitfalls": [
+      "State key missing important info",
+      "Off-by-one in cycle calculation",
+      "Not storing enough history"
+    ],
+    "relatedAlgos": ["memoization", "simulation"],
+    "recognitionHints": [
+      "'After 1000000000 steps'",
+      "Simulation too slow to complete",
+      "Deterministic state transitions"
+    ],
+    "examples": [{
+      "title": "Billion Iterations",
+      "description": "Find state after 10^9 steps",
+      "input": "States: A→B→C→D→B→C→D→...",
+      "output": "State at iteration 10^9",
+      "visual": "i=0  i=1  i=2  i=3  i=4  i=5\n A    B    C    D    B    C ...\n           └─────────┘\n           Cycle detected!\n           B seen at i=1 and i=4\n           \nCycle start: 1\nCycle length: 4 - 1 = 3\n\nFor target=1000000000:\n  offset = (1000000000 - 1) % 3 = 2\n  answer = states[1 + 2] = states[3] = D",
+      "steps": [
+        {"description": "Simulate and record states", "state": "seen: {A:0, B:1, C:2, D:3}"},
+        {"description": "At i=4, B already in seen", "state": "Cycle found!"},
+        {"description": "Calculate final position", "state": "(10^9 - 1) % 3 = 2"},
+        {"description": "Look up states[1+2]", "state": "Answer: D"}
+      ]
+    }]
+  },
+  {
+    "id": "union-find",
+    "name": "Union-Find (Disjoint Set)",
+    "category": "Data Structures",
+    "tags": ["graph", "connected-components", "grouping", "equivalence"],
+    "difficulty": "Intermediate",
+    "description": "Efficiently track elements in disjoint sets. Near-constant time union and find operations.",
+    "whenToUse": [
+      "Dynamic connectivity queries",
+      "Finding connected components incrementally",
+      "Kruskal's MST algorithm",
+      "Grouping equivalent items"
+    ],
+    "pseudoCode": "class UnionFind:\n    parent = [i for i in range(n)]  # Each node is own parent\n    rank = [0] * n\n    \n    function find(x):\n        if parent[x] != x:\n            parent[x] = find(parent[x])  # Path compression\n        return parent[x]\n    \n    function union(x, y):\n        root_x, root_y = find(x), find(y)\n        if root_x == root_y:\n            return False  # Already same set\n        \n        # Union by rank\n        if rank[root_x] < rank[root_y]:\n            parent[root_x] = root_y\n        elif rank[root_x] > rank[root_y]:\n            parent[root_y] = root_x\n        else:\n            parent[root_y] = root_x\n            rank[root_x] += 1\n        return True",
+    "complexity": {"time": "O(α(n)) ≈ O(1) per operation", "space": "O(n)"},
+    "aocExamples": ["2017 Day 12 - Digital Plumber", "2018 Day 25 - Constellations"],
+    "resources": ["https://en.wikipedia.org/wiki/Disjoint-set_data_structure"],
+    "prerequisites": [],
+    "keyInsight": "Path compression + union by rank makes trees nearly flat. α(n) is inverse Ackermann, practically constant.",
+    "commonPitfalls": [
+      "Forgetting path compression (slower)",
+      "Union without checking if already same set",
+      "Using for ordered relationships (wrong tool)"
+    ],
+    "relatedAlgos": ["bfs", "dfs", "flood-fill"],
+    "recognitionHints": [
+      "Grouping items by equivalence",
+      "'Are X and Y connected?'",
+      "Adding edges and checking connectivity",
+      "Counting distinct groups"
+    ],
+    "examples": [{
+      "title": "Connected Components",
+      "description": "Track groups as edges added",
+      "input": "Edges: (0,1), (1,2), (3,4)",
+      "output": "3 components: {0,1,2}, {3,4}, {5}",
+      "visual": "Initial: 0  1  2  3  4  5  (6 components)\n\nunion(0,1):\n  0    2  3  4  5\n  |               (5 components)\n  1\n\nunion(1,2): find(1)=0, union(0,2)\n  0    3  4  5\n / \\            (4 components)\n1   2\n\nunion(3,4):\n  0    3    5\n / \\   |        (3 components)\n1   2  4",
+      "steps": [
+        {"description": "Initialize: each is own parent", "state": "6 components"},
+        {"description": "union(0,1)", "state": "5 components"},
+        {"description": "union(1,2): find(1)=0", "state": "4 components"},
+        {"description": "union(3,4)", "state": "3 components"}
+      ]
+    }]
+  },
+  {
+    "id": "flood-fill",
+    "name": "Flood Fill",
+    "category": "Graph Traversal",
+    "tags": ["grid", "connected-components", "bfs", "dfs"],
+    "difficulty": "Beginner",
+    "description": "Mark all connected cells from a starting point. Can use BFS or DFS. Foundation for counting regions.",
+    "whenToUse": [
+      "Counting islands/regions",
+      "Finding enclosed areas",
+      "Paint bucket tool",
+      "Marking reachable area"
+    ],
+    "pseudoCode": "function flood_fill(grid, start_r, start_c, target, replacement):\n    if out_of_bounds(start_r, start_c):\n        return\n    if grid[start_r][start_c] != target:\n        return\n    if grid[start_r][start_c] == replacement:\n        return\n    \n    grid[start_r][start_c] = replacement\n    \n    flood_fill(grid, start_r + 1, start_c, target, replacement)\n    flood_fill(grid, start_r - 1, start_c, target, replacement)\n    flood_fill(grid, start_r, start_c + 1, target, replacement)\n    flood_fill(grid, start_r, start_c - 1, target, replacement)\n\n# Count islands pattern\nfunction count_islands(grid):\n    count = 0\n    for each cell:\n        if cell == LAND:\n            flood_fill(grid, r, c, LAND, VISITED)\n            count += 1\n    return count",
+    "complexity": {"time": "O(rows * cols)", "space": "O(rows * cols) for recursion"},
+    "aocExamples": ["2021 Day 9 - Smoke Basin", "2022 Day 18 - Lava", "2023 Day 10 - Pipe Maze"],
+    "resources": ["https://en.wikipedia.org/wiki/Flood_fill"],
+    "prerequisites": ["dfs", "bfs"],
+    "keyInsight": "Flood fill is just BFS/DFS applied to grid connectivity. Mark as visited by changing the value.",
+    "commonPitfalls": [
+      "Stack overflow on large grids (use iterative BFS)",
+      "Forgetting diagonal connectivity when needed",
+      "Not handling grid boundaries"
+    ],
+    "relatedAlgos": ["bfs", "dfs", "union-find"],
+    "recognitionHints": [
+      "Count separate regions",
+      "Find area of connected cells",
+      "'How many islands'",
+      "Mark all reachable from start"
+    ],
+    "examples": [{
+      "title": "Count Islands",
+      "description": "Count separate land masses",
+      "input": "##.#\\n##..\\n...#\\n..##",
+      "output": "3 islands",
+      "visual": "Original:     After marking:\n# # . #       1 1 . 2\n# # . .   →   1 1 . .\n. . . #       . . . 3\n. . # #       . . 3 3\n\nIsland 1: flood fill from (0,0)\nIsland 2: flood fill from (0,3)\nIsland 3: flood fill from (2,3)",
+      "steps": [
+        {"description": "Scan for unvisited #", "state": "Found (0,0)"},
+        {"description": "Flood fill marks region", "state": "Island 1 marked"},
+        {"description": "Continue scanning", "state": "Found (0,3), then (2,3)"},
+        {"description": "Total count", "state": "3 islands"}
+      ]
+    }]
+  },
+  {
+    "id": "priority-queue",
+    "name": "Priority Queue / Heap",
+    "category": "Data Structures",
+    "tags": ["heap", "scheduling", "dijkstra", "top-k"],
+    "difficulty": "Intermediate",
+    "description": "Data structure for O(1) access to min/max element with O(log n) insert and extract. Essential for Dijkstra/A*.",
+    "whenToUse": [
+      "Dijkstra's algorithm",
+      "Task scheduling by priority",
+      "K largest/smallest elements",
+      "Merge K sorted lists"
+    ],
+    "pseudoCode": "# Most languages have built-in:\n# Python: heapq (min-heap)\n# Go: container/heap\n# JS: implement or use library\n\nimport heapq\n\npq = []\nheapq.heappush(pq, (priority, item))\npriority, item = heapq.heappop(pq)  # Gets minimum\n\n# For max-heap, negate priorities:\nheapq.heappush(pq, (-priority, item))\n\n# Manual heap operations (for reference):\nfunction bubble_up(heap, i):\n    while i > 0:\n        parent = (i - 1) // 2\n        if heap[parent] > heap[i]:\n            swap(heap[parent], heap[i])\n            i = parent\n        else:\n            break",
+    "complexity": {"time": "O(log n) push/pop, O(1) peek", "space": "O(n)"},
+    "aocExamples": ["2021 Day 15 - Chiton", "2023 Day 17 - Crucible", "Any Dijkstra problem"],
+    "resources": ["https://en.wikipedia.org/wiki/Binary_heap"],
+    "prerequisites": [],
+    "keyInsight": "Heap property: parent ≤ children (min-heap). This makes min always at root, accessible in O(1).",
+    "commonPitfalls": [
+      "Confusing min-heap vs max-heap",
+      "Modifying elements in heap (invalidates heap property)",
+      "Using wrong comparison for custom objects"
+    ],
+    "relatedAlgos": ["dijkstra", "a-star"],
+    "recognitionHints": [
+      "Need 'next smallest' repeatedly",
+      "Dijkstra or A* needed",
+      "Top K / Kth largest",
+      "Merge sorted sequences"
+    ],
+    "examples": [{
+      "title": "Heap Operations",
+      "description": "Min-heap insert and extract",
+      "input": "Insert: 5, 3, 7, 1. Extract twice.",
+      "output": "Extracted: 1, then 3",
+      "visual": "Insert 5:    Insert 3:    Insert 7:    Insert 1:\n    5            3            3            1\n                /            / \\          / \\\n               5            5   7        3   7\n                                        /\n                                       5\n\nExtract min (1):\n    5            3         Min always at top!\n   / \\    →    / \\\n  3   7       5   7",
+      "steps": [
+        {"description": "Push 5", "state": "heap: [5]"},
+        {"description": "Push 3, bubbles up", "state": "heap: [3,5]"},
+        {"description": "Push 7", "state": "heap: [3,5,7]"},
+        {"description": "Push 1, bubbles to top", "state": "heap: [1,3,7,5]"},
+        {"description": "Pop returns 1", "state": "heap: [3,5,7]"}
+      ]
+    }]
+  },
+  {
+    "id": "gcd-lcm",
+    "name": "GCD and LCM",
+    "category": "Math & Number Theory",
+    "tags": ["number-theory", "euclidean", "cycles", "modular"],
+    "difficulty": "Beginner",
+    "description": "Greatest Common Divisor and Least Common Multiple. Foundational for cycle alignment and number theory.",
+    "whenToUse": [
+      "Finding when cycles align",
+      "Reducing fractions",
+      "Modular arithmetic",
+      "Synchronization problems"
+    ],
+    "pseudoCode": "function gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n\nfunction lcm(a, b):\n    return a * b // gcd(a, b)\n\nfunction lcm_multiple(numbers):\n    result = numbers[0]\n    for num in numbers[1:]:\n        result = lcm(result, num)\n    return result",
+    "complexity": {"time": "O(log(min(a,b)))", "space": "O(1)"},
+    "aocExamples": ["2023 Day 8 - Haunted Wasteland", "2019 Day 12 - N-Body", "2017 Day 13 - Scanners"],
+    "resources": ["https://en.wikipedia.org/wiki/Euclidean_algorithm"],
+    "prerequisites": [],
+    "keyInsight": "LCM tells you when multiple cycles align. If cycles have lengths A, B, C, they all align at LCM(A,B,C).",
+    "commonPitfalls": [
+      "Integer overflow: compute a//gcd(a,b)*b not a*b//gcd",
+      "Forgetting to reduce iteratively for multiple numbers",
+      "Not handling zero inputs"
+    ],
+    "relatedAlgos": ["cycle-detection", "modular-arithmetic"],
+    "recognitionHints": [
+      "Multiple periodic events, when do all occur together?",
+      "Cycles of different lengths",
+      "'Every N steps' patterns"
+    ],
+    "examples": [{
+      "title": "Cycle Alignment",
+      "description": "When do cycles of 4, 6, 10 all align?",
+      "input": "Periods: 4, 6, 10",
+      "output": "LCM = 60",
+      "visual": "Period 4:  X . . . X . . . X . . . X ...\n           0       4       8       12\n\nPeriod 6:  X . . . . . X . . . . . X ...\n           0           6           12\n\nPeriod 10: X . . . . . . . . . X ...\n           0                   10\n\nLCM(4,6) = 12\nLCM(12,10) = 60\n\nAll align at: 0, 60, 120, ...",
+      "steps": [
+        {"description": "GCD(4,6) = 2", "state": "LCM(4,6) = 24/2 = 12"},
+        {"description": "GCD(12,10) = 2", "state": "LCM(12,10) = 120/2 = 60"}
+      ]
+    }]
+  },
+  {
+    "id": "modular-arithmetic",
+    "name": "Modular Arithmetic",
+    "category": "Math & Number Theory",
+    "tags": ["math", "modulo", "overflow", "cryptography"],
+    "difficulty": "Intermediate",
+    "description": "Arithmetic where numbers wrap around at a modulus. Essential for large number problems and avoiding overflow.",
+    "whenToUse": [
+      "Counting problems with huge results",
+      "'Answer modulo 10^9+7'",
+      "Cryptography",
+      "Cyclic patterns"
+    ],
+    "pseudoCode": "# Properties:\n# (a + b) mod m = ((a mod m) + (b mod m)) mod m\n# (a * b) mod m = ((a mod m) * (b mod m)) mod m\n# (a - b) mod m = ((a mod m) - (b mod m) + m) mod m\n\n# Modular exponentiation: a^n mod m\nfunction mod_pow(a, n, m):\n    result = 1\n    a = a % m\n    while n > 0:\n        if n % 2 == 1:\n            result = (result * a) % m\n        n = n // 2\n        a = (a * a) % m\n    return result\n\n# Modular inverse (when m is prime):\n# a^(-1) mod m = a^(m-2) mod m  (Fermat's little theorem)\nfunction mod_inverse(a, m):\n    return mod_pow(a, m - 2, m)",
+    "complexity": {"time": "O(log n) for mod_pow", "space": "O(1)"},
+    "aocExamples": ["2020 Day 13 - Shuttle Search (CRT)", "Many counting problems"],
+    "resources": ["https://en.wikipedia.org/wiki/Modular_arithmetic"],
+    "prerequisites": ["gcd-lcm"],
+    "keyInsight": "Apply mod after every operation to prevent overflow. Division requires modular inverse.",
+    "commonPitfalls": [
+      "Overflow before taking mod",
+      "Subtraction going negative (add m before mod)",
+      "Division doesn't work directly - need modular inverse"
+    ],
+    "relatedAlgos": ["gcd-lcm"],
+    "recognitionHints": [
+      "'Give answer mod 10^9+7'",
+      "Result would be astronomically large",
+      "Chinese Remainder Theorem problems",
+      "Encryption/hashing"
+    ],
+    "examples": [{
+      "title": "Large Exponent",
+      "description": "Calculate 2^100 mod 1000000007",
+      "input": "base=2, exp=100, mod=10^9+7",
+      "output": "976371285",
+      "visual": "Naive: 2^100 = huge number (overflow!)\n\nModular exponentiation:\n2^100 = 2^64 * 2^32 * 2^4\n\nn=100 (binary: 1100100)\nStep: n=100, a=2, result=1\nStep: n=50,  a=4, result=1\nStep: n=25,  a=16, result=1\nStep: n=12,  a=256, result=16\nStep: n=6,   a=65536, result=16\nStep: n=3,   a=..., result=...\n...\n\nEach step: square a, conditionally multiply result",
+      "steps": [
+        {"description": "Initialize result=1, a=2", "state": "n=100"},
+        {"description": "Square and reduce mod m", "state": "Each step O(1)"},
+        {"description": "log(n) iterations", "state": "~7 steps for n=100"},
+        {"description": "Final result", "state": "976371285"}
+      ]
+    }]
+  },
+  {
+    "id": "sliding-window",
+    "name": "Sliding Window",
+    "category": "Optimization Patterns",
+    "tags": ["array", "string", "substring", "optimization"],
+    "difficulty": "Beginner",
+    "description": "Maintain a window that slides over data to find subarrays/substrings with certain properties in O(n).",
+    "whenToUse": [
+      "Maximum/minimum in fixed-size window",
+      "Substrings with k distinct characters",
+      "Contiguous subarray with target sum",
+      "First unique character in stream"
+    ],
+    "pseudoCode": "# Fixed-size window\nfunction max_sum_k(arr, k):\n    window_sum = sum(arr[0:k])\n    max_sum = window_sum\n    \n    for i in range(k, len(arr)):\n        window_sum += arr[i] - arr[i-k]  # Slide\n        max_sum = max(max_sum, window_sum)\n    \n    return max_sum\n\n# Variable-size window (two pointers variant)\nfunction min_window_with_sum(arr, target):\n    left = 0\n    current_sum = 0\n    min_len = infinity\n    \n    for right in range(len(arr)):\n        current_sum += arr[right]\n        \n        while current_sum >= target:\n            min_len = min(min_len, right - left + 1)\n            current_sum -= arr[left]\n            left += 1\n    \n    return min_len",
+    "complexity": {"time": "O(n)", "space": "O(1) or O(k)"},
+    "aocExamples": ["2022 Day 6 - Tuning Trouble", "2023 Day 1 - Trebuchet"],
+    "resources": ["https://en.wikipedia.org/wiki/Sliding_window_protocol"],
+    "prerequisites": [],
+    "keyInsight": "Instead of recalculating for each position, update by removing left element and adding right element.",
+    "commonPitfalls": [
+      "Off-by-one in window boundaries",
+      "Forgetting to shrink window when needed",
+      "Not handling edge cases (window larger than array)"
+    ],
+    "relatedAlgos": ["two-pointers", "monotonic-stack"],
+    "recognitionHints": [
+      "'Find subarray of size k with max/min X'",
+      "Contiguous subsequence problems",
+      "'First position where last k elements are unique'"
+    ],
+    "examples": [{
+      "title": "First Marker (AoC 2022 Day 6)",
+      "description": "Find first position where last 4 chars are unique",
+      "input": "mjqjpqmgbljsphdztnvjfqwrcgsmlb",
+      "output": "Position 7 (after 'jpqm')",
+      "visual": "m j q j p q m g b l j ...\n└─┬─┘\n  Window 1: 'mjqj' - has dup 'j' ✗\n\nm j q j p q m g b l j ...\n  └─┬─┘\n    Window 2: 'jqjp' - has dup 'j' ✗\n\nm j q j p q m g b l j ...\n      └─┬─┘\n        Window 4: 'jpqm' - all unique! ✓\n\nUse set to track chars in window:\n- Add char when expanding right\n- Remove char when sliding left\n- Check if set.size == window.size",
+      "steps": [
+        {"description": "Window 'mjqj'", "state": "set size 3 < 4"},
+        {"description": "Slide to 'jqjp'", "state": "set size 3 < 4"},
+        {"description": "Slide to 'jpqm'", "state": "set size 4 = 4, found!"}
+      ]
+    }]
+  },
+  {
+    "id": "manhattan-distance",
+    "name": "Manhattan Distance",
+    "category": "Geometry",
+    "tags": ["grid", "distance", "geometry", "heuristic"],
+    "difficulty": "Beginner",
+    "description": "Distance as sum of absolute coordinate differences. Natural for grid movement and A* heuristics.",
+    "whenToUse": [
+      "Grid pathfinding heuristic",
+      "Problems with 4-directional movement",
+      "Taxicab geometry",
+      "Range queries in grids"
+    ],
+    "pseudoCode": "function manhattan(p1, p2):\n    return abs(p1.x - p2.x) + abs(p1.y - p2.y)\n\n# Common grid directions\nFOUR_DIRS = [(0,1), (0,-1), (1,0), (-1,0)]\nEIGHT_DIRS = FOUR_DIRS + [(1,1), (1,-1), (-1,1), (-1,-1)]\n\n# Chebyshev distance (8-dir movement)\nfunction chebyshev(p1, p2):\n    return max(abs(p1.x - p2.x), abs(p1.y - p2.y))",
+    "complexity": {"time": "O(1)", "space": "O(1)"},
+    "aocExamples": ["2022 Day 15 - Beacons", "2019 Day 3 - Crossed Wires", "Nearly every grid puzzle"],
+    "resources": ["https://en.wikipedia.org/wiki/Taxicab_geometry"],
+    "prerequisites": [],
+    "keyInsight": "Manhattan distance forms diamond shapes, not circles. Points at distance d form a rotated square.",
+    "commonPitfalls": [
+      "Confusing with Euclidean distance",
+      "Forgetting it's for 4-dir movement",
+      "Not considering diagonal variants (Chebyshev)"
+    ],
+    "relatedAlgos": ["a-star", "bfs"],
+    "recognitionHints": [
+      "Grid with 4-directional movement",
+      "A* heuristic for grids",
+      "'All points within distance d'",
+      "Taxicab/city-block distance"
+    ],
+    "examples": [{
+      "title": "Diamond Shape",
+      "description": "All points at Manhattan distance 2 from origin",
+      "input": "center=(0,0), distance=2",
+      "output": "Diamond of 8 points",
+      "visual": "Euclidean d=2:     Manhattan d=2:\n    . . . . .          . . * . .\n    . . * . .          . * . * .\n    . * O * .    vs    * . O . *\n    . . * . .          . * . * .\n    . . . . .          . . * . .\n    (circle)           (diamond)\n\nPoints at Manhattan distance 2:\n(-2,0), (-1,1), (0,2), (1,1),\n(2,0), (1,-1), (0,-2), (-1,-1)",
+      "steps": [
+        {"description": "d = |dx| + |dy|", "state": "Sum of axis distances"},
+        {"description": "d=2: all (x,y) where |x|+|y|=2", "state": "8 points"},
+        {"description": "Forms diamond shape", "state": "Not a circle!"}
+      ]
+    }]
+  },
+  {
+    "id": "shoelace-picks",
+    "name": "Shoelace Formula + Pick's Theorem",
+    "category": "Geometry",
+    "tags": ["polygon", "area", "grid", "geometry"],
+    "difficulty": "Intermediate",
+    "description": "Calculate polygon area from vertices (Shoelace) and relate area to interior/boundary points (Pick's).",
+    "whenToUse": [
+      "Polygon area calculation",
+      "Counting interior points of polygon",
+      "Grid-based area problems"
+    ],
+    "pseudoCode": "# Shoelace formula for polygon area\nfunction polygon_area(vertices):\n    n = len(vertices)\n    area = 0\n    for i in range(n):\n        j = (i + 1) % n\n        area += vertices[i].x * vertices[j].y\n        area -= vertices[j].x * vertices[i].y\n    return abs(area) / 2\n\n# Pick's theorem: A = i + b/2 - 1\n# Where: A = area, i = interior points, b = boundary points\n# So: i = A - b/2 + 1\n\nfunction interior_points(area, boundary_points):\n    return area - boundary_points // 2 + 1\n\nfunction total_points(area, boundary_points):\n    return interior_points(area, boundary_points) + boundary_points",
+    "complexity": {"time": "O(n) vertices", "space": "O(1)"},
+    "aocExamples": ["2023 Day 18 - Lava Lagoon", "2023 Day 10 - Pipe Maze (part 2)"],
+    "resources": ["https://en.wikipedia.org/wiki/Shoelace_formula", "https://en.wikipedia.org/wiki/Pick%27s_theorem"],
+    "prerequisites": [],
+    "keyInsight": "Shoelace gives area from coordinates. Pick's connects area to lattice points. Together they solve 'count enclosed points' problems.",
+    "commonPitfalls": [
+      "Vertices must be in order (CW or CCW)",
+      "Don't forget to close the polygon (last to first)",
+      "Pick's only works for simple polygons on integer lattice"
+    ],
+    "relatedAlgos": ["flood-fill"],
+    "recognitionHints": [
+      "'Find area enclosed by path'",
+      "'Count points inside polygon'",
+      "Grid tracing problems"
+    ],
+    "examples": [{
+      "title": "AoC 2023 Day 18 Pattern",
+      "description": "Count all points inside traced path",
+      "input": "Path: R6, D5, L2, D2, ...",
+      "output": "Total enclosed + boundary points",
+      "visual": "#######\n#.....#\n###...#\n..#...#\n..#...#\n###.###\n#...#..\n##..###\n.#....#\n.######\n\nBoundary points (b): count path length\nShoelace area (A): from vertices\nInterior (i) = A - b/2 + 1\nTotal = i + b",
+      "steps": [
+        {"description": "Trace path, collect vertices", "state": "[(0,0), (6,0), ...]"},
+        {"description": "Count boundary points", "state": "b = path length"},
+        {"description": "Shoelace for area", "state": "A = 42 (example)"},
+        {"description": "Pick's: i = A - b/2 + 1", "state": "Total = i + b"}
+      ]
+    }]
+  },
+  {
+    "id": "coordinate-compression",
+    "name": "Coordinate Compression",
+    "category": "Geometry",
+    "tags": ["discretization", "sparse", "range", "optimization"],
+    "difficulty": "Intermediate",
+    "description": "Map large/sparse coordinates to small dense indices. Enables array-based solutions for huge coordinate spaces.",
+    "whenToUse": [
+      "Coordinates span huge range but few unique values",
+      "Need array indexing but coords are 10^9",
+      "Sparse grid problems",
+      "Range/interval problems with large values"
+    ],
+    "pseudoCode": "function compress(coordinates):\n    # Get sorted unique values\n    sorted_unique = sorted(set(coordinates))\n    \n    # Map original -> compressed\n    compress_map = {v: i for i, v in enumerate(sorted_unique)}\n    \n    # Map compressed -> original\n    decompress_map = {i: v for i, v in enumerate(sorted_unique)}\n    \n    return compress_map, decompress_map\n\n# Example usage:\ncoords = [1000000, 5, 999999999, 5, 1000000]\ncomp, decomp = compress(coords)\n# comp = {5: 0, 1000000: 1, 999999999: 2}\n# Now can use indices 0, 1, 2 in arrays",
+    "complexity": {"time": "O(n log n) for sorting", "space": "O(unique values)"},
+    "aocExamples": ["2022 Day 15 - Beacons (x-coords)", "Range problems with large values"],
+    "resources": ["https://en.wikipedia.org/wiki/Data_compression"],
+    "prerequisites": [],
+    "keyInsight": "Only the relative order matters, not absolute values. Compress to [0, n) where n = unique values.",
+    "commonPitfalls": [
+      "Forgetting to decompress for final answer",
+      "Not handling duplicate coordinates",
+      "Compressing when order/distance matters (wrong tool)"
+    ],
+    "relatedAlgos": ["interval-merging"],
+    "recognitionHints": [
+      "Coordinates up to 10^9 but few points",
+      "Need 2D array but coords too large",
+      "'Sparse' data in huge space"
+    ],
+    "examples": [{
+      "title": "Sparse Line Sweep",
+      "description": "Count covered points on number line",
+      "input": "Intervals: [1, 1000000], [999999, 999999999]",
+      "output": "Points covered",
+      "visual": "Original coords: 1, 999999, 1000000, 999999999\n\nCompressed:      0    1       2         3\n\nNow can use array of size 4 instead of 10^9!\n\nInterval [1, 1000000] -> [0, 2]\nInterval [999999, 999999999] -> [1, 3]\n\n  0   1   2   3\n  [=======]       Interval 1\n      [=======]   Interval 2",
+      "steps": [
+        {"description": "Collect all coordinates", "state": "[1, 999999, 1000000, 999999999]"},
+        {"description": "Sort and assign indices", "state": "Map to [0,1,2,3]"},
+        {"description": "Use compressed indices", "state": "Array size = 4"},
+        {"description": "Decompress for answer", "state": "Map back if needed"}
+      ]
+    }]
+  },
+  {
+    "id": "interval-merging",
+    "name": "Interval Merging",
+    "category": "Optimization Patterns",
+    "tags": ["intervals", "sorting", "ranges", "scheduling"],
+    "difficulty": "Intermediate",
+    "description": "Combine overlapping intervals into non-overlapping set. Foundation for many range problems.",
+    "whenToUse": [
+      "Merging overlapping time slots",
+      "Finding gaps in ranges",
+      "Counting total covered length",
+      "Scheduling problems"
+    ],
+    "pseudoCode": "function merge_intervals(intervals):\n    if not intervals:\n        return []\n    \n    # Sort by start\n    intervals.sort(key=lambda x: x[0])\n    \n    merged = [intervals[0]]\n    \n    for start, end in intervals[1:]:\n        last_end = merged[-1][1]\n        \n        if start <= last_end:  # Overlaps\n            merged[-1][1] = max(last_end, end)\n        else:  # Gap\n            merged.append([start, end])\n    \n    return merged\n\n# Total covered length\nfunction covered_length(intervals):\n    merged = merge_intervals(intervals)\n    return sum(end - start for start, end in merged)",
+    "complexity": {"time": "O(n log n) for sorting", "space": "O(n)"},
+    "aocExamples": ["2022 Day 15 - Beacons", "Scheduling problems"],
+    "resources": ["https://en.wikipedia.org/wiki/Interval_scheduling"],
+    "prerequisites": [],
+    "keyInsight": "Sort by start, then greedily extend or start new interval. After sorting, one pass suffices.",
+    "commonPitfalls": [
+      "Forgetting to sort first",
+      "Wrong overlap condition (< vs <=)",
+      "Not handling adjacent intervals correctly"
+    ],
+    "relatedAlgos": ["coordinate-compression", "sliding-window"],
+    "recognitionHints": [
+      "Multiple ranges that might overlap",
+      "'Total time covered'",
+      "Finding gaps between intervals",
+      "Merging bookings/schedules"
+    ],
+    "examples": [{
+      "title": "Merge Overlapping",
+      "description": "Combine overlapping intervals",
+      "input": "[[1,3], [2,6], [8,10], [15,18]]",
+      "output": "[[1,6], [8,10], [15,18]]",
+      "visual": "Input intervals:\n1---3\n  2-------6\n            8--10\n                   15--18\n\nAfter sorting by start: already sorted\n\nMerge process:\n[1,3] - start merged with [1,3]\n[2,6] - overlaps! extend to [1,6]\n[8,10] - gap, new interval\n[15,18] - gap, new interval\n\nResult:\n1---------6    8--10    15--18",
+      "steps": [
+        {"description": "Sort by start", "state": "[[1,3], [2,6], [8,10], [15,18]]"},
+        {"description": "[1,3] + [2,6] overlap", "state": "merged: [[1,6]]"},
+        {"description": "[8,10] doesn't overlap 6", "state": "merged: [[1,6], [8,10]]"},
+        {"description": "[15,18] doesn't overlap 10", "state": "merged: [[1,6], [8,10], [15,18]]"}
+      ]
+    }]
+  },
+  {
+    "id": "monotonic-stack",
+    "name": "Monotonic Stack",
+    "category": "Data Structures",
+    "tags": ["stack", "array", "optimization", "next-greater"],
+    "difficulty": "Intermediate",
+    "description": "Stack maintaining increasing/decreasing order. Solves 'next greater element' and similar problems in O(n).",
+    "whenToUse": [
+      "Next greater/smaller element",
+      "Maximum rectangle in histogram",
+      "Stock span problems",
+      "Sliding window maximum (with deque)"
+    ],
+    "pseudoCode": "# Next greater element for each position\nfunction next_greater(arr):\n    n = len(arr)\n    result = [-1] * n\n    stack = []  # Store indices\n    \n    for i in range(n):\n        # Pop elements smaller than current\n        while stack and arr[stack[-1]] < arr[i]:\n            idx = stack.pop()\n            result[idx] = arr[i]\n        stack.append(i)\n    \n    return result\n\n# Stack remains monotonically decreasing",
+    "complexity": {"time": "O(n) - each element pushed/popped once", "space": "O(n)"},
+    "aocExamples": ["Histogram problems", "View distance calculations"],
+    "resources": ["https://en.wikipedia.org/wiki/Stack_(abstract_data_type)"],
+    "prerequisites": [],
+    "keyInsight": "When new element breaks monotonicity, all popped elements found their answer. Each element is processed exactly twice (push + pop).",
+    "commonPitfalls": [
+      "Storing values vs indices (usually want indices)",
+      "Wrong comparison direction (< vs <=)",
+      "Forgetting elements remaining in stack at end"
+    ],
+    "relatedAlgos": ["sliding-window", "priority-queue"],
+    "recognitionHints": [
+      "'Next greater element to the right'",
+      "'Previous smaller element'",
+      "Histogram/skyline problems",
+      "'How far can you see'"
+    ],
+    "examples": [{
+      "title": "Next Greater Element",
+      "description": "For each element, find next larger to the right",
+      "input": "[2, 1, 2, 4, 3]",
+      "output": "[4, 2, 4, -1, -1]",
+      "visual": "arr:    [2, 1, 2, 4, 3]\nresult: [4, 2, 4,-1,-1]\n\ni=0: push 0, stack=[0]\ni=1: 1<2, push 1, stack=[0,1]\ni=2: 2>1, pop 1→result[1]=2\n     2=2, push 2, stack=[0,2]\ni=3: 4>2, pop 2→result[2]=4\n     4>2, pop 0→result[0]=4\n     push 3, stack=[3]\ni=4: 3<4, push 4, stack=[3,4]\n\nRemaining in stack: no next greater → -1\n\nStack stays decreasing: [4, 3] at end",
+      "steps": [
+        {"description": "Process arr[0]=2", "state": "stack: [0]"},
+        {"description": "Process arr[1]=1", "state": "stack: [0,1]"},
+        {"description": "Process arr[2]=2, pops idx 1", "state": "result[1]=2"},
+        {"description": "Process arr[3]=4, pops 2,0", "state": "result[2]=4, result[0]=4"},
+        {"description": "Remaining have no greater", "state": "result: [4,2,4,-1,-1]"}
+      ]
+    }]
+  },
+  {
+    "id": "trie",
+    "name": "Trie (Prefix Tree)",
+    "category": "Data Structures",
+    "tags": ["string", "prefix", "autocomplete", "tree"],
+    "difficulty": "Intermediate",
+    "description": "Tree structure for efficient string prefix operations. Each node represents a character, paths form strings.",
+    "whenToUse": [
+      "Autocomplete / prefix search",
+      "Word validation in dictionary",
+      "Longest common prefix",
+      "Word search puzzles"
+    ],
+    "pseudoCode": "class TrieNode:\n    children = {}  # char -> TrieNode\n    is_end = False\n\nclass Trie:\n    root = TrieNode()\n    \n    function insert(word):\n        node = root\n        for char in word:\n            if char not in node.children:\n                node.children[char] = TrieNode()\n            node = node.children[char]\n        node.is_end = True\n    \n    function search(word):\n        node = root\n        for char in word:\n            if char not in node.children:\n                return False\n            node = node.children[char]\n        return node.is_end\n    \n    function starts_with(prefix):\n        node = root\n        for char in prefix:\n            if char not in node.children:\n                return False\n            node = node.children[char]\n        return True",
+    "complexity": {"time": "O(m) per operation, m = string length", "space": "O(total characters)"},
+    "aocExamples": ["2024 Day 19 - Linen Layout", "Word search problems"],
+    "resources": ["https://en.wikipedia.org/wiki/Trie"],
+    "prerequisites": [],
+    "keyInsight": "Shared prefixes share nodes. 'cat', 'car', 'card' share 'c'->'a' path, then branch.",
+    "commonPitfalls": [
+      "Forgetting is_end flag (prefix vs complete word)",
+      "Memory usage for sparse character sets",
+      "Not handling empty string edge case"
+    ],
+    "relatedAlgos": ["memoization", "dfs"],
+    "recognitionHints": [
+      "'Find all words starting with X'",
+      "'Can string be split into dictionary words'",
+      "Multiple pattern matching",
+      "Autocomplete feature"
+    ],
+    "examples": [{
+      "title": "Word Dictionary",
+      "description": "Insert and search words",
+      "input": "Insert: cat, car, card. Search: car, ca",
+      "output": "car: true, ca: false (not complete word)",
+      "visual": "        root\n         |\n         c\n         |\n         a\n        / \\\n       t   r*    <- 'car' ends here\n       *   |\n           d*    <- 'card' ends here\n\n* = is_end = True\n\nSearch 'car': c->a->r, is_end=True ✓\nSearch 'ca':  c->a, is_end=False ✗\nSearch 'cab': c->a->?, no 'b' child ✗\nPrefix 'ca': c->a exists ✓",
+      "steps": [
+        {"description": "Insert 'cat'", "state": "root->c->a->t*"},
+        {"description": "Insert 'car'", "state": "root->c->a->(t*, r*)"},
+        {"description": "Insert 'card'", "state": "root->c->a->(t*, r*->d*)"},
+        {"description": "Search 'car'", "state": "Found, is_end=True"}
+      ]
+    }]
+  }
+]
