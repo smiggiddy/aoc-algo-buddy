@@ -1,0 +1,143 @@
+/* Spoiler Dialog Overlay */
+.spoiler-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* Dialog Box */
+.spoiler-dialog {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  animation: dialogFadeIn 0.2s ease-out;
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Warning Icon */
+.spoiler-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Title */
+.spoiler-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+/* Message */
+.spoiler-message {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* Actions */
+.spoiler-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.spoiler-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.spoiler-btn-cancel {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.spoiler-btn-cancel:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.spoiler-btn-confirm {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--bg-primary);
+}
+
+.spoiler-btn-confirm:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+}
+
+/* Reveal Button (used in AlgorithmDetail) */
+.spoiler-reveal-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.spoiler-reveal-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  border-style: solid;
+}
+
+.spoiler-reveal-icon {
+  font-size: 1rem;
+}
+
+@media (max-width: 480px) {
+  .spoiler-dialog {
+    padding: 1.5rem;
+  }
+
+  .spoiler-actions {
+    flex-direction: column;
+  }
+
+  .spoiler-btn {
+    width: 100%;
+  }
+}

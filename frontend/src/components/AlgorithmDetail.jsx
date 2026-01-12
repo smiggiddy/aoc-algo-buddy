@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import './AlgorithmDetail.css'
+import SpoilerDialog from './SpoilerDialog'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
@@ -10,6 +11,8 @@ function AlgorithmDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [showSpoilerDialog, setShowSpoilerDialog] = useState(false)
+  const [showAocExamples, setShowAocExamples] = useState(false)
 
   useEffect(() => {
     const fetchAlgorithm = async () => {
@@ -188,12 +191,32 @@ function AlgorithmDetail() {
         {algorithm.aocExamples && algorithm.aocExamples.length > 0 && (
           <section className="section">
             <h2 className="section-title">Advent of Code Examples</h2>
-            <ul className="aoc-examples">
-              {algorithm.aocExamples.map((example, i) => (
-                <li key={i}>{example}</li>
-              ))}
-            </ul>
+            {showAocExamples ? (
+              <ul className="aoc-examples">
+                {algorithm.aocExamples.map((example, i) => (
+                  <li key={i}>{example}</li>
+                ))}
+              </ul>
+            ) : (
+              <button
+                className="spoiler-reveal-btn"
+                onClick={() => setShowSpoilerDialog(true)}
+              >
+                <span className="spoiler-reveal-icon">?</span>
+                Click to reveal AoC examples (spoilers)
+              </button>
+            )}
           </section>
+        )}
+
+        {showSpoilerDialog && (
+          <SpoilerDialog
+            onConfirm={() => {
+              setShowAocExamples(true)
+              setShowSpoilerDialog(false)
+            }}
+            onCancel={() => setShowSpoilerDialog(false)}
+          />
         )}
 
         {algorithm.examples && algorithm.examples.length > 0 && (
