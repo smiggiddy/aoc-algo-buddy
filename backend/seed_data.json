@@ -1188,5 +1188,94 @@
         {"description": "Final array sorted", "state": "[1,2,3,4,5,6]"}
       ]
     }]
+  },
+  {
+    "id": "tree-traversals",
+    "name": "Tree Traversals (Inorder/Preorder/Postorder)",
+    "category": "Trees",
+    "tags": ["tree", "recursion", "dfs", "binary-tree"],
+    "difficulty": "Beginner",
+    "description": "Three fundamental ways to visit all nodes in a binary tree. The order of visiting node vs children determines the traversal type.",
+    "whenToUse": [
+      "Processing all nodes in a tree",
+      "Inorder: Get sorted order from BST",
+      "Preorder: Copy/serialize tree structure",
+      "Postorder: Delete tree, evaluate expression tree"
+    ],
+    "pseudoCode": "function inorder(node):\n    if node is null: return\n    inorder(node.left)    # Left\n    process(node)         # Node\n    inorder(node.right)   # Right\n\nfunction preorder(node):\n    if node is null: return\n    process(node)         # Node\n    preorder(node.left)   # Left\n    preorder(node.right)  # Right\n\nfunction postorder(node):\n    if node is null: return\n    postorder(node.left)  # Left\n    postorder(node.right) # Right\n    process(node)         # Node\n\n# Iterative inorder with stack:\nfunction inorder_iterative(root):\n    stack = []\n    current = root\n    while stack or current:\n        while current:\n            stack.push(current)\n            current = current.left\n        current = stack.pop()\n        process(current)\n        current = current.right",
+    "complexity": {"time": "O(n) visits each node once", "space": "O(h) where h = height"},
+    "aocExamples": ["2022 Day 7 - Directory tree", "2021 Day 18 - Snailfish (tree manipulation)"],
+    "resources": ["https://en.wikipedia.org/wiki/Tree_traversal"],
+    "prerequisites": ["dfs"],
+    "keyInsight": "The name tells you when to process the node: INorder = IN the middle (left, NODE, right), PREorder = PRE/before children, POSTorder = POST/after children.",
+    "commonPitfalls": [
+      "Confusing the three orderings",
+      "Stack overflow on deep trees (use iterative)",
+      "Forgetting null checks"
+    ],
+    "relatedAlgos": ["dfs", "bfs", "binary-search-tree"],
+    "recognitionHints": [
+      "Process tree nodes in specific order",
+      "BST to sorted array (inorder)",
+      "Serialize/deserialize tree (preorder)",
+      "Calculate values bottom-up (postorder)"
+    ],
+    "examples": [{
+      "title": "Three Traversals",
+      "description": "Traverse same tree three ways",
+      "input": "Tree:    1\n        / \\\n       2   3\n      / \\\n     4   5",
+      "output": "Inorder: 4,2,5,1,3  Pre: 1,2,4,5,3  Post: 4,5,2,3,1",
+      "visual": "        1\n       / \\\n      2   3\n     / \\\n    4   5\n\nInorder (Left, Node, Right):\n  Visit 4, visit 2, visit 5, visit 1, visit 3\n  Result: [4, 2, 5, 1, 3]\n  (For BST: gives sorted order!)\n\nPreorder (Node, Left, Right):\n  Visit 1, visit 2, visit 4, visit 5, visit 3\n  Result: [1, 2, 4, 5, 3]\n  (Root first - good for copying tree)\n\nPostorder (Left, Right, Node):\n  Visit 4, visit 5, visit 2, visit 3, visit 1\n  Result: [4, 5, 2, 3, 1]\n  (Children before parent - good for deletion)",
+      "steps": [
+        {"description": "Inorder: go left, process, go right", "state": "4,2,5,1,3"},
+        {"description": "Preorder: process, go left, go right", "state": "1,2,4,5,3"},
+        {"description": "Postorder: go left, go right, process", "state": "4,5,2,3,1"}
+      ]
+    }]
+  },
+  {
+    "id": "binary-search-tree",
+    "name": "Binary Search Tree (BST)",
+    "category": "Trees",
+    "tags": ["tree", "search", "ordered", "data-structure"],
+    "difficulty": "Intermediate",
+    "description": "Binary tree with ordering property: left subtree < node < right subtree. Enables O(log n) search, insert, delete when balanced.",
+    "whenToUse": [
+      "Ordered data with frequent search/insert/delete",
+      "Finding min/max, predecessor/successor",
+      "Range queries",
+      "When you need sorted iteration"
+    ],
+    "pseudoCode": "class BSTNode:\n    value, left, right\n\nfunction search(node, target):\n    if node is null:\n        return null\n    if target == node.value:\n        return node\n    elif target < node.value:\n        return search(node.left, target)\n    else:\n        return search(node.right, target)\n\nfunction insert(node, value):\n    if node is null:\n        return new BSTNode(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    else:\n        node.right = insert(node.right, value)\n    return node\n\nfunction find_min(node):\n    while node.left:\n        node = node.left\n    return node\n\nfunction delete(node, value):\n    if node is null: return null\n    if value < node.value:\n        node.left = delete(node.left, value)\n    elif value > node.value:\n        node.right = delete(node.right, value)\n    else:  # Found node to delete\n        if node.left is null: return node.right\n        if node.right is null: return node.left\n        # Two children: replace with inorder successor\n        successor = find_min(node.right)\n        node.value = successor.value\n        node.right = delete(node.right, successor.value)\n    return node",
+    "complexity": {"time": "O(h) per operation, h = height", "space": "O(h) for recursion"},
+    "aocExamples": ["Ordered data problems", "Range searches"],
+    "resources": ["https://en.wikipedia.org/wiki/Binary_search_tree"],
+    "prerequisites": ["binary-search", "tree-traversals"],
+    "keyInsight": "BST property means we can eliminate half the tree at each step, like binary search. Inorder traversal gives sorted order.",
+    "commonPitfalls": [
+      "Unbalanced trees degrade to O(n) - consider self-balancing variants",
+      "Delete with two children is tricky (need inorder successor)",
+      "Duplicates handling (left or right? or count?)"
+    ],
+    "relatedAlgos": ["binary-search", "tree-traversals", "priority-queue"],
+    "recognitionHints": [
+      "Need ordered set operations",
+      "Frequent search + insert + delete",
+      "Find k-th smallest element",
+      "Range queries in ordered data"
+    ],
+    "examples": [{
+      "title": "BST Operations",
+      "description": "Insert, search, and delete in BST",
+      "input": "Insert: 5, 3, 7, 2, 4, 6, 8",
+      "output": "Balanced BST with search/delete",
+      "visual": "After insertions:\n        5\n       / \\\n      3   7\n     / \\ / \\\n    2  4 6  8\n\nSearch for 4:\n  5 -> 4<5 -> go left\n  3 -> 4>3 -> go right\n  4 -> found!\n\nInorder traversal: [2,3,4,5,6,7,8] (sorted!)\n\nDelete 3 (has two children):\n  Find inorder successor: 4\n  Replace 3 with 4\n        5\n       / \\\n      4   7\n     /   / \\\n    2   6   8",
+      "steps": [
+        {"description": "Insert maintains BST property", "state": "left < node < right"},
+        {"description": "Search: compare and go left/right", "state": "O(log n) if balanced"},
+        {"description": "Delete leaf: just remove", "state": "Delete 2: simple"},
+        {"description": "Delete with two children: use successor", "state": "Delete 3: replace with 4"}
+      ]
+    }]
   }
 ]
