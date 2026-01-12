@@ -349,8 +349,8 @@ func main() {
 	// Serve static files for production
 	mux.HandleFunc("/", handleStatic)
 
-	// CORS middleware
-	handler := corsMiddleware(mux)
+	// Middleware chain: logging -> CORS -> handler
+	handler := loggingMiddleware(corsMiddleware(mux))
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -360,6 +360,28 @@ func main() {
 	log.Printf("Server starting on port %s", port)
 	log.Printf("Admin credentials: %s / %s", adminUser, strings.Repeat("*", len(adminPass)))
 	log.Fatal(http.ListenAndServe(":"+port, handler))
+}
+
+// responseWriter wraps http.ResponseWriter to capture status code
+type responseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.status = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		wrapped := &responseWriter{ResponseWriter: w, status: http.StatusOK}
+		next.ServeHTTP(wrapped, r)
+
+		log.Printf("%s %s %d %s", r.Method, r.URL.Path, wrapped.status, time.Since(start))
+	})
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
