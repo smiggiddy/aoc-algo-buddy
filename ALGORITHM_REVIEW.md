@@ -2,27 +2,30 @@
 
 ## Current State Summary
 
-The catalog has been significantly expanded from **13 to 24 algorithms** with important structural improvements. This review assesses the current state and identifies remaining gaps for comprehensive CS education.
+The catalog has been expanded from **24 to 36 algorithms** with comprehensive foundational coverage. This review documents the current state after implementing recommended additions.
 
-### Current Catalog (24 Algorithms)
+### Current Catalog (36 Algorithms)
 
 | Category | Algorithms | Count |
 |----------|------------|-------|
 | Graph Traversal | BFS, DFS, Flood Fill | 3 |
-| Shortest Path | Dijkstra, A* | 2 |
+| Shortest Path | Dijkstra, A*, **Bellman-Ford** | 3 |
 | Graph Algorithms | Topological Sort | 1 |
-| Dynamic Programming | Memoization, Tabulation | 2 |
+| **Sorting** | **Merge Sort, Quick Sort, Insertion Sort** | 3 |
+| **Trees** | **Tree Traversals, Binary Search Tree** | 2 |
+| Dynamic Programming | Memoization, Tabulation, **LCS, Knapsack** | 4 |
 | Search Techniques | Binary Search, Two Pointers, Backtracking | 3 |
 | State Modeling | State Space BFS | 1 |
 | Optimization Patterns | Cycle Detection, Sliding Window, Interval Merging | 3 |
 | Data Structures | Union-Find, Priority Queue, Monotonic Stack, Trie | 4 |
 | Math & Number Theory | GCD/LCM, Modular Arithmetic | 2 |
 | Geometry | Manhattan Distance, Shoelace/Pick's, Coordinate Compression | 3 |
+| **Greedy** | **Activity Selection** | 1 |
+| **Bit Operations** | **Bit Manipulation, Bitmasking** | 2 |
 
-### Recent Improvements (Addressed)
+### Recent Improvements (All Implemented)
 
-The following previously-recommended features have been implemented:
-
+**Phase 1 (Previously Implemented):**
 | Recommendation | Status |
 |----------------|--------|
 | A* Search | ✅ Added |
@@ -36,7 +39,22 @@ The following previously-recommended features have been implemented:
 | Recognition hints field | ✅ Added |
 | Key insight field | ✅ Added |
 
-**Additional valuable additions not previously recommended:**
+**Phase 2 (Just Implemented):**
+| Recommendation | Status |
+|----------------|--------|
+| Merge Sort | ✅ Added |
+| Quick Sort | ✅ Added |
+| Insertion Sort | ✅ Added |
+| Tree Traversals | ✅ Added |
+| Binary Search Tree | ✅ Added |
+| Longest Common Subsequence | ✅ Added |
+| 0/1 Knapsack | ✅ Added |
+| Activity Selection (Greedy) | ✅ Added |
+| Bit Manipulation | ✅ Added |
+| Bitmasking | ✅ Added |
+| Bellman-Ford | ✅ Added |
+
+**Bonus additions (from Phase 1):**
 - State Space BFS (complex state modeling)
 - Monotonic Stack (advanced pattern)
 - Shoelace/Pick's Theorem (polygon area)
