@@ -1277,5 +1277,94 @@
         {"description": "Delete with two children: use successor", "state": "Delete 3: replace with 4"}
       ]
     }]
+  },
+  {
+    "id": "longest-common-subsequence",
+    "name": "Longest Common Subsequence (LCS)",
+    "category": "Dynamic Programming",
+    "tags": ["dp", "string", "2d-dp", "subsequence"],
+    "difficulty": "Intermediate",
+    "description": "Find longest subsequence present in both strings. Classic 2D DP problem teaching state definition and table filling.",
+    "whenToUse": [
+      "Comparing similarity of sequences",
+      "Diff algorithms (finding changes between files)",
+      "DNA/protein sequence alignment",
+      "Version control (finding common parts)"
+    ],
+    "pseudoCode": "function lcs(s1, s2):\n    m, n = len(s1), len(s2)\n    # dp[i][j] = LCS length for s1[0:i] and s2[0:j]\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    \n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if s1[i-1] == s2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    \n    return dp[m][n]\n\n# Reconstruct the actual LCS:\nfunction reconstruct_lcs(dp, s1, s2):\n    result = []\n    i, j = len(s1), len(s2)\n    while i > 0 and j > 0:\n        if s1[i-1] == s2[j-1]:\n            result.append(s1[i-1])\n            i -= 1\n            j -= 1\n        elif dp[i-1][j] > dp[i][j-1]:\n            i -= 1\n        else:\n            j -= 1\n    return ''.join(reversed(result))",
+    "complexity": {"time": "O(m * n)", "space": "O(m * n), reducible to O(min(m,n))"},
+    "aocExamples": ["String comparison problems", "Finding common patterns"],
+    "resources": ["https://en.wikipedia.org/wiki/Longest_common_subsequence_problem"],
+    "prerequisites": ["memoization", "tabulation"],
+    "keyInsight": "At each position, either characters match (extend LCS) or they don't (take best of skipping either character). 2D table captures all subproblems.",
+    "commonPitfalls": [
+      "Confusing subsequence (not contiguous) with substring (contiguous)",
+      "Off-by-one errors with 1-indexed dp table",
+      "Forgetting to handle empty string base cases"
+    ],
+    "relatedAlgos": ["edit-distance", "tabulation", "memoization"],
+    "recognitionHints": [
+      "Find common elements in order (not necessarily adjacent)",
+      "Sequence alignment",
+      "'Longest matching pattern' between two sequences"
+    ],
+    "examples": [{
+      "title": "LCS of Two Strings",
+      "description": "Find LCS of 'ABCDGH' and 'AEDFHR'",
+      "input": "s1='ABCDGH', s2='AEDFHR'",
+      "output": "LCS='ADH', length=3",
+      "visual": "    ''  A  E  D  F  H  R\n ''  0  0  0  0  0  0  0\n A   0  1  1  1  1  1  1\n B   0  1  1  1  1  1  1\n C   0  1  1  1  1  1  1\n D   0  1  1  2  2  2  2\n G   0  1  1  2  2  2  2\n H   0  1  1  2  2  3  3\n\nReconstruct: trace back from (6,6)\n  H matches -> include H\n  G doesn't match -> go to max(up, left)\n  D matches -> include D\n  ... A matches -> include A\n\nLCS = 'ADH' (read backwards: H,D,A -> A,D,H)",
+      "steps": [
+        {"description": "Initialize first row/col to 0", "state": "Empty string has LCS 0"},
+        {"description": "If chars match: dp[i][j] = dp[i-1][j-1] + 1", "state": "Extend LCS"},
+        {"description": "If no match: dp[i][j] = max(up, left)", "state": "Best of skipping either"},
+        {"description": "Trace back to reconstruct", "state": "Follow arrows backward"}
+      ]
+    }]
+  },
+  {
+    "id": "knapsack",
+    "name": "0/1 Knapsack Problem",
+    "category": "Dynamic Programming",
+    "tags": ["dp", "optimization", "subset", "selection"],
+    "difficulty": "Intermediate",
+    "description": "Select items to maximize value without exceeding weight capacity. Each item can be taken once (0/1). Classic optimization DP.",
+    "whenToUse": [
+      "Resource allocation with constraints",
+      "Subset selection for optimization",
+      "Budget allocation problems",
+      "'Best subset with limit' problems"
+    ],
+    "pseudoCode": "# items = [(weight, value), ...]\n# capacity = max weight allowed\n\nfunction knapsack(items, capacity):\n    n = len(items)\n    # dp[i][w] = max value using items[0:i] with capacity w\n    dp = [[0] * (capacity + 1) for _ in range(n + 1)]\n    \n    for i in range(1, n + 1):\n        weight, value = items[i-1]\n        for w in range(capacity + 1):\n            # Don't take item i\n            dp[i][w] = dp[i-1][w]\n            # Take item i (if it fits)\n            if weight <= w:\n                dp[i][w] = max(dp[i][w], dp[i-1][w-weight] + value)\n    \n    return dp[n][capacity]\n\n# Space-optimized version (1D):\nfunction knapsack_1d(items, capacity):\n    dp = [0] * (capacity + 1)\n    for weight, value in items:\n        # Iterate backwards to avoid using same item twice\n        for w in range(capacity, weight - 1, -1):\n            dp[w] = max(dp[w], dp[w - weight] + value)\n    return dp[capacity]",
+    "complexity": {"time": "O(n * capacity)", "space": "O(n * capacity) or O(capacity)"},
+    "aocExamples": ["Resource allocation", "Subset sum variants", "Optimization under constraints"],
+    "resources": ["https://en.wikipedia.org/wiki/Knapsack_problem"],
+    "prerequisites": ["tabulation", "memoization"],
+    "keyInsight": "For each item, decide: take it (add value, reduce capacity) or leave it. The 2D table considers all items × all capacities.",
+    "commonPitfalls": [
+      "Confusing 0/1 (take once) with unbounded (take multiple)",
+      "1D optimization: must iterate capacity backwards",
+      "Not handling items with weight > capacity"
+    ],
+    "relatedAlgos": ["longest-common-subsequence", "tabulation", "subset-sum"],
+    "recognitionHints": [
+      "'Maximize X without exceeding limit Y'",
+      "Select subset with constraint",
+      "'Best combination within budget'",
+      "Each item used at most once"
+    ],
+    "examples": [{
+      "title": "Classic Knapsack",
+      "description": "Items with weight/value, capacity 7",
+      "input": "Items: [(1,1), (3,4), (4,5), (5,7)], Capacity: 7",
+      "output": "Max value: 9 (items: 3kg/$4 + 4kg/$5)",
+      "visual": "Items: (w=1,v=1), (w=3,v=4), (w=4,v=5), (w=5,v=7)\nCapacity: 7\n\nDP Table (dp[item][capacity]):\n       Cap: 0  1  2  3  4  5  6  7\nNo items:   0  0  0  0  0  0  0  0\nItem 1:     0  1  1  1  1  1  1  1  (w=1,v=1)\nItem 2:     0  1  1  4  5  5  5  5  (w=3,v=4)\nItem 3:     0  1  1  4  5  6  6  9  (w=4,v=5)\nItem 4:     0  1  1  4  5  7  8  9  (w=5,v=7)\n\nAt capacity 7:\n  Item 3+2: weight=7, value=9 ✓\n  Item 4+1: weight=6, value=8 ✗\n\nBest: take items 2 and 3 for value 9",
+      "steps": [
+        {"description": "For each item and capacity", "state": "Consider take vs leave"},
+        {"description": "dp[i][w] = max(leave, take)", "state": "leave=dp[i-1][w], take=dp[i-1][w-wt]+val"},
+        {"description": "Fill table row by row", "state": "Each cell is subproblem"},
+        {"description": "Answer at dp[n][capacity]", "state": "Max value = 9"}
+      ]
+    }]
   }
 ]
