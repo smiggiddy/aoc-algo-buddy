@@ -11,6 +11,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -93,6 +94,7 @@ var db *Database
 // Admin credentials (set via environment variables)
 var adminUser = getEnv("ADMIN_USER", "admin")
 var adminPass = getEnv("ADMIN_PASS", "changeme")
+var dataDir = getEnv("DATA_DIR", "")
 
 func getEnv(key, defaultVal string) string {
 	if val := os.Getenv(key); val != "" {
@@ -102,8 +104,13 @@ func getEnv(key, defaultVal string) string {
 }
 
 func init() {
+	dataFile := "data.json"
+	if dataDir != "" {
+		dataFile = filepath.Join(dataDir, "data.json")
+	}
+
 	db = &Database{
-		dataFile: "data.json",
+		dataFile: dataFile,
 		captchas: make(map[string]CaptchaChallenge),
 	}
 
@@ -358,6 +365,9 @@ func main() {
 	}
 
 	log.Printf("Server starting on port %s", port)
+	if dataDir != "" {
+		log.Printf("Data directory: %s", dataDir)
+	}
 	log.Printf("Admin credentials: %s / %s", adminUser, strings.Repeat("*", len(adminPass)))
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
@@ -380,7 +390,12 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		wrapped := &responseWriter{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(wrapped, r)
 
-		log.Printf("%s %s %d %s", r.Method, r.URL.Path, wrapped.status, time.Since(start))
+		ip := r.Header.Get("X-Forwarded-For")
+		if ip == "" {
+			ip = r.RemoteAddr
+		}
+
+		log.Printf("%s %s %s %d %s", ip, r.Method, r.URL.Path, wrapped.status, time.Since(start))
 	})
 }
 

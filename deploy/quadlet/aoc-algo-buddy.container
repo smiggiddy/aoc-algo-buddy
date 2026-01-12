@@ -1,0 +1,18 @@
+[Unit]
+Description=AoC Algo Buddy
+After=local-fs.target
+
+[Container]
+Image=ghcr.io/smiggiddy/aoc-algo-buddy:latest
+PublishPort=8080:8080
+Volume=aoc-algo-buddy.volume:/app/data:Z
+Environment=PORT=8080
+Environment=DATA_DIR=/app/data
+EnvironmentFile=%E/aoc-algo-buddy/env
+AutoUpdate=registry
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
