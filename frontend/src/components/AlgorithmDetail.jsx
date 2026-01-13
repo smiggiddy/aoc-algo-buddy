@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useSettings, SPOILER_PREFS } from '../context/SettingsContext'
 import './AlgorithmDetail.css'
+import SpoilerDialog from './SpoilerDialog'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
@@ -10,6 +12,9 @@ function AlgorithmDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [showSpoilerDialog, setShowSpoilerDialog] = useState(false)
+  const [showAocExamples, setShowAocExamples] = useState(false)
+  const { toggleFavorite, isFavorite, spoilerPref } = useSettings()
 
   useEffect(() => {
     const fetchAlgorithm = async () => {
@@ -61,9 +66,18 @@ function AlgorithmDetail() {
           <span className="back-arrow">&larr;</span> All Algorithms
         </Link>
 
-        <button onClick={copyLink} className="share-btn">
-          {copied ? 'Copied!' : 'Share Link'}
-        </button>
+        <div className="header-actions">
+          <button
+            onClick={() => toggleFavorite(id)}
+            className={`favorite-detail-btn ${isFavorite(id) ? 'active' : ''}`}
+            title={isFavorite(id) ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            {isFavorite(id) ? '\u2605' : '\u2606'}
+          </button>
+          <button onClick={copyLink} className="share-btn">
+            {copied ? 'Copied!' : 'Share Link'}
+          </button>
+        </div>
       </div>
 
       <div className="detail-content">
@@ -188,12 +202,34 @@ function AlgorithmDetail() {
         {algorithm.aocExamples && algorithm.aocExamples.length > 0 && (
           <section className="section">
             <h2 className="section-title">Advent of Code Examples</h2>
-            <ul className="aoc-examples">
-              {algorithm.aocExamples.map((example, i) => (
-                <li key={i}>{example}</li>
-              ))}
-            </ul>
+            {spoilerPref === SPOILER_PREFS.HIDE ? (
+              <p className="spoiler-hidden-msg">Spoilers are hidden. Change in settings to view.</p>
+            ) : showAocExamples || spoilerPref === SPOILER_PREFS.SHOW ? (
+              <ul className="aoc-examples">
+                {algorithm.aocExamples.map((example, i) => (
+                  <li key={i}>{example}</li>
+                ))}
+              </ul>
+            ) : (
+              <button
+                className="spoiler-reveal-btn"
+                onClick={() => setShowSpoilerDialog(true)}
+              >
+                <span className="spoiler-reveal-icon">?</span>
+                Click to reveal AoC examples (spoilers)
+              </button>
+            )}
           </section>
+        )}
+
+        {showSpoilerDialog && (
+          <SpoilerDialog
+            onConfirm={() => {
+              setShowAocExamples(true)
+              setShowSpoilerDialog(false)
+            }}
+            onCancel={() => setShowSpoilerDialog(false)}
+          />
         )}
 
         {algorithm.examples && algorithm.examples.length > 0 && (

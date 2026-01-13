@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useSettings } from '../context/SettingsContext'
 import './AlgorithmList.css'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
@@ -10,12 +11,14 @@ function AlgorithmList() {
   const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { favorites, toggleFavorite, isFavorite } = useSettings()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') || ''
   const category = searchParams.get('category') || ''
   const tag = searchParams.get('tag') || ''
   const difficulty = searchParams.get('difficulty') || ''
+  const showFavoritesOnly = searchParams.get('favorites') === 'true'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +54,7 @@ function AlgorithmList() {
 
   const filteredAlgorithms = useMemo(() => {
     return algorithms.filter(algo => {
+      if (showFavoritesOnly && !favorites.includes(algo.id)) return false
       if (category && algo.category !== category) return false
       if (difficulty && algo.difficulty !== difficulty) return false
       if (tag && !algo.tags.includes(tag)) return false
@@ -63,7 +67,7 @@ function AlgorithmList() {
       }
       return true
     })
-  }, [algorithms, category, difficulty, tag, search])
+  }, [algorithms, category, difficulty, tag, search, showFavoritesOnly, favorites])
 
   const groupedAlgorithms = useMemo(() => {
     const groups = {}
@@ -90,7 +94,7 @@ function AlgorithmList() {
     setSearchParams({})
   }
 
-  const hasActiveFilters = search || category || tag || difficulty
+  const hasActiveFilters = search || category || tag || difficulty || showFavoritesOnly
 
   if (loading) {
     return <div className="loading">Loading algorithms...</div>
@@ -114,6 +118,15 @@ function AlgorithmList() {
         </div>
 
         <div className="filter-row">
+          <button
+            onClick={() => updateFilter('favorites', showFavoritesOnly ? '' : 'true')}
+            className={`favorites-filter-btn ${showFavoritesOnly ? 'active' : ''}`}
+            title={showFavoritesOnly ? 'Show all algorithms' : 'Show favorites only'}
+          >
+            <span className="star-icon">{showFavoritesOnly ? '\u2605' : '\u2606'}</span>
+            Favorites {favorites.length > 0 && `(${favorites.length})`}
+          </button>
+
           <select
             value={category}
             onChange={(e) => updateFilter('category', e.target.value)}
@@ -170,24 +183,35 @@ function AlgorithmList() {
               <h2 className="category-title">{categoryName}</h2>
               <div className="algorithm-cards">
                 {algos.map(algo => (
-                  <Link
-                    to={`/algorithm/${algo.id}`}
-                    key={algo.id}
-                    className="algorithm-card"
-                  >
-                    <div className="card-header">
-                      <h3 className="card-title">{algo.name}</h3>
-                      <span className={`difficulty difficulty-${algo.difficulty.toLowerCase()}`}>
-                        {algo.difficulty}
-                      </span>
-                    </div>
-                    <p className="card-description">{algo.description}</p>
-                    <div className="card-tags">
-                      {algo.tags.slice(0, 4).map(t => (
-                        <span key={t} className="tag">{t}</span>
-                      ))}
-                    </div>
-                  </Link>
+                  <div key={algo.id} className="algorithm-card-wrapper">
+                    <button
+                      className={`favorite-btn ${isFavorite(algo.id) ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        toggleFavorite(algo.id)
+                      }}
+                      title={isFavorite(algo.id) ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      {isFavorite(algo.id) ? '\u2605' : '\u2606'}
+                    </button>
+                    <Link
+                      to={`/algorithm/${algo.id}`}
+                      className="algorithm-card"
+                    >
+                      <div className="card-header">
+                        <h3 className="card-title">{algo.name}</h3>
+                        <span className={`difficulty difficulty-${algo.difficulty.toLowerCase()}`}>
+                          {algo.difficulty}
+                        </span>
+                      </div>
+                      <p className="card-description">{algo.description}</p>
+                      <div className="card-tags">
+                        {algo.tags.slice(0, 4).map(t => (
+                          <span key={t} className="tag">{t}</span>
+                        ))}
+                      </div>
+                    </Link>
+                  </div>
                 ))}
               </div>
             </div>
