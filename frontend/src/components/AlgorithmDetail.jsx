@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useSettings, SPOILER_PREFS } from '../context/SettingsContext'
 import './AlgorithmDetail.css'
 import SpoilerDialog from './SpoilerDialog'
 
@@ -13,6 +14,7 @@ function AlgorithmDetail() {
   const [copied, setCopied] = useState(false)
   const [showSpoilerDialog, setShowSpoilerDialog] = useState(false)
   const [showAocExamples, setShowAocExamples] = useState(false)
+  const { toggleFavorite, isFavorite, spoilerPref } = useSettings()
 
   useEffect(() => {
     const fetchAlgorithm = async () => {
@@ -64,9 +66,18 @@ function AlgorithmDetail() {
           <span className="back-arrow">&larr;</span> All Algorithms
         </Link>
 
-        <button onClick={copyLink} className="share-btn">
-          {copied ? 'Copied!' : 'Share Link'}
-        </button>
+        <div className="header-actions">
+          <button
+            onClick={() => toggleFavorite(id)}
+            className={`favorite-detail-btn ${isFavorite(id) ? 'active' : ''}`}
+            title={isFavorite(id) ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            {isFavorite(id) ? '\u2605' : '\u2606'}
+          </button>
+          <button onClick={copyLink} className="share-btn">
+            {copied ? 'Copied!' : 'Share Link'}
+          </button>
+        </div>
       </div>
 
       <div className="detail-content">
@@ -191,7 +202,9 @@ function AlgorithmDetail() {
         {algorithm.aocExamples && algorithm.aocExamples.length > 0 && (
           <section className="section">
             <h2 className="section-title">Advent of Code Examples</h2>
-            {showAocExamples ? (
+            {spoilerPref === SPOILER_PREFS.HIDE ? (
+              <p className="spoiler-hidden-msg">Spoilers are hidden. Change in settings to view.</p>
+            ) : showAocExamples || spoilerPref === SPOILER_PREFS.SHOW ? (
               <ul className="aoc-examples">
                 {algorithm.aocExamples.map((example, i) => (
                   <li key={i}>{example}</li>

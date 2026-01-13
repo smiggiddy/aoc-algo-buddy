@@ -1,7 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useSettings, SPOILER_PREFS } from '../context/SettingsContext'
 import './Header.css'
 
 function Header() {
+  const [showSettings, setShowSettings] = useState(false)
+  const { spoilerPref, setSpoilerPref, favorites } = useSettings()
+
   return (
     <header className="header">
       <div className="header-content">
@@ -18,6 +23,35 @@ function Header() {
           <Link to="/submit" className="nav-link contribute-btn">
             + Contribute
           </Link>
+          <div className="settings-wrapper">
+            <button
+              className="settings-btn"
+              onClick={() => setShowSettings(!showSettings)}
+              title="Settings"
+            >
+              <span className="settings-icon">{'\u2699'}</span>
+            </button>
+            {showSettings && (
+              <div className="settings-dropdown">
+                <div className="settings-header">Settings</div>
+                <div className="settings-section">
+                  <label className="settings-label">AoC Spoilers</label>
+                  <select
+                    value={spoilerPref}
+                    onChange={(e) => setSpoilerPref(e.target.value)}
+                    className="settings-select"
+                  >
+                    <option value={SPOILER_PREFS.ASK}>Ask each time</option>
+                    <option value={SPOILER_PREFS.SHOW}>Always show</option>
+                    <option value={SPOILER_PREFS.HIDE}>Always hide</option>
+                  </select>
+                </div>
+                <div className="settings-info">
+                  {favorites.length} favorited algorithm{favorites.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
     </header>
