@@ -1,6 +1,15 @@
 # AoC Algo Buddy
 
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://aoc-buddy.thecodedom.com)
+[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5+-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
 A collaborative web app to help developers learn common algorithms for solving Advent of Code problems. Features language-agnostic pseudo code, visual examples, community contributions, and shareable links.
+
+**[Live Demo](https://aoc-buddy.thecodedom.com)**
 
 ## Tech Stack
 
