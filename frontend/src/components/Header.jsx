@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useSettings, SPOILER_PREFS, THEMES } from '../context/SettingsContext'
 import './Header.css'
@@ -6,6 +6,32 @@ import './Header.css'
 function Header() {
   const [showSettings, setShowSettings] = useState(false)
   const { spoilerPref, setSpoilerPref, favorites, theme, toggleTheme } = useSettings()
+  const settingsRef = useRef(null)
+
+  // Close settings dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setShowSettings(false)
+      }
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setShowSettings(false)
+      }
+    }
+
+    if (showSettings) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleEscape)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showSettings])
 
   return (
     <header className="header">
@@ -30,7 +56,7 @@ function Header() {
           >
             {theme === THEMES.DARK ? '\u2600' : '\u263D'}
           </button>
-          <div className="settings-wrapper">
+          <div className="settings-wrapper" ref={settingsRef}>
             <button
               className="settings-btn"
               onClick={() => setShowSettings(!showSettings)}

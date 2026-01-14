@@ -94,6 +94,61 @@
   color: var(--accent);
 }
 
+/* Export dropdown */
+.export-wrapper {
+  position: relative;
+}
+
+.export-btn {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--bg-primary);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.export-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+}
+
+.export-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.export-option {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.export-option:hover {
+  background: var(--bg-tertiary);
+}
+
+.export-option:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
 /* Content */
 .detail-content {
   display: flex;

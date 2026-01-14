@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSettings, SPOILER_PREFS } from '../context/SettingsContext'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
+import { downloadAsMarkdown, exportAsPDF } from '../utils/exportAlgorithm'
 import './AlgorithmDetail.css'
 import SpoilerDialog from './SpoilerDialog'
 import PseudoCodeBlock from './PseudoCodeBlock'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
-function AlgorithmDetail() {
+function AlgorithmDetail({ onShowHelp }) {
   const { id } = useParams()
   const [algorithm, setAlgorithm] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -15,6 +17,8 @@ function AlgorithmDetail() {
   const [copied, setCopied] = useState(false)
   const [showSpoilerDialog, setShowSpoilerDialog] = useState(false)
   const [showAocExamples, setShowAocExamples] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const exportMenuRef = useRef(null)
   const { toggleFavorite, isFavorite, spoilerPref, addRecentlyViewed } = useSettings()
 
   useEffect(() => {
@@ -45,6 +49,51 @@ function AlgorithmDetail() {
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
+    }
+  }
+
+  // Keyboard shortcuts for detail page
+  useKeyboardShortcuts({
+    'f': () => {
+      if (id) toggleFavorite(id)
+    },
+    '?': () => {
+      if (onShowHelp) onShowHelp()
+    },
+    'Escape': () => {
+      if (showSpoilerDialog) setShowSpoilerDialog(false)
+      if (showExportMenu) setShowExportMenu(false)
+    },
+  })
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setShowExportMenu(false)
+      }
+    }
+
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showExportMenu])
+
+  const handleExportMarkdown = () => {
+    if (algorithm) {
+      downloadAsMarkdown(algorithm)
+      setShowExportMenu(false)
+    }
+  }
+
+  const handleExportPDF = () => {
+    if (algorithm) {
+      exportAsPDF(algorithm)
+      setShowExportMenu(false)
     }
   }
 
@@ -80,6 +129,25 @@ function AlgorithmDetail() {
           <button onClick={copyLink} className="share-btn">
             {copied ? 'Copied!' : 'Share Link'}
           </button>
+          <div className="export-wrapper" ref={exportMenuRef}>
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="export-btn"
+              title="Export algorithm"
+            >
+              Export
+            </button>
+            {showExportMenu && (
+              <div className="export-dropdown">
+                <button onClick={handleExportMarkdown} className="export-option">
+                  Download as Markdown
+                </button>
+                <button onClick={handleExportPDF} className="export-option">
+                  Export as PDF
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -143,7 +211,7 @@ function AlgorithmDetail() {
 
         <section className="section">
           <h2 className="section-title">Pseudo Code</h2>
-          <PseudoCodeBlock code={algorithm.pseudoCode} />
+          <PseudoCodeBlock code={algorithm.pseudoCode} algorithmName={algorithm.name} />
         </section>
 
         <section className="section">

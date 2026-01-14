@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import './PseudoCodeBlock.css'
 
-function PseudoCodeBlock({ code }) {
+function PseudoCodeBlock({ code, algorithmName }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [selectedLines, setSelectedLines] = useState(new Set())
   const [lastClickedLine, setLastClickedLine] = useState(null)
   const [copied, setCopied] = useState(false)
   const [copyType, setCopyType] = useState(null)
+  const [showShareMenu, setShowShareMenu] = useState(false)
+  const shareMenuRef = useRef(null)
 
   const lines = useMemo(() => code.split('\n'), [code])
 
@@ -138,6 +140,84 @@ function PseudoCodeBlock({ code }) {
     }
   }, [location.hash, location.pathname, location.search, navigate])
 
+  // Get the current URL with line selection hash
+  const getShareUrl = useCallback(() => {
+    return window.location.href
+  }, [])
+
+  // Copy URL with line selection
+  const copyShareUrl = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(getShareUrl())
+      setCopied(true)
+      setCopyType('url')
+      setShowShareMenu(false)
+      setTimeout(() => {
+        setCopied(false)
+        setCopyType(null)
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to copy URL:', err)
+    }
+  }, [getShareUrl])
+
+  // Copy as Markdown format
+  const copyAsMarkdown = useCallback(async () => {
+    const selectedCode = getSelectedCode()
+    const url = getShareUrl()
+    const name = algorithmName || 'Algorithm'
+
+    let markdown
+    if (selectedLines.size > 0) {
+      const sortedLines = [...selectedLines].sort((a, b) => a - b)
+      const lineRange = sortedLines.length === 1
+        ? `Line ${sortedLines[0]}`
+        : `Lines ${sortedLines[0]}-${sortedLines[sortedLines.length - 1]}`
+
+      markdown = `**[${name}](${url})** (${lineRange})
+
+\`\`\`
+${selectedCode}
+\`\`\``
+    } else {
+      markdown = `**[${name}](${url})**
+
+\`\`\`
+${selectedCode}
+\`\`\``
+    }
+
+    try {
+      await navigator.clipboard.writeText(markdown)
+      setCopied(true)
+      setCopyType('markdown')
+      setShowShareMenu(false)
+      setTimeout(() => {
+        setCopied(false)
+        setCopyType(null)
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to copy markdown:', err)
+    }
+  }, [getSelectedCode, getShareUrl, selectedLines, algorithmName])
+
+  // Close share menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
+        setShowShareMenu(false)
+      }
+    }
+
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showShareMenu])
+
   return (
     <div className="pseudo-code-block">
       <div className="code-toolbar">
@@ -174,6 +254,25 @@ function PseudoCodeBlock({ code }) {
           >
             {copied && copyType === 'all' ? 'Copied!' : 'Copy All'}
           </button>
+          <div className="share-wrapper" ref={shareMenuRef}>
+            <button
+              className="share-code-btn"
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              title="Share code"
+            >
+              {copied && (copyType === 'url' || copyType === 'markdown') ? 'Copied!' : 'Share'}
+            </button>
+            {showShareMenu && (
+              <div className="share-dropdown">
+                <button onClick={copyShareUrl} className="share-option">
+                  Copy URL{selectedLines.size > 0 ? ' with selection' : ''}
+                </button>
+                <button onClick={copyAsMarkdown} className="share-option">
+                  Copy as Markdown
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div className="code-container">

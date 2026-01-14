@@ -1,17 +1,23 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
+import AlgorithmOfDay from './AlgorithmOfDay'
 import './AlgorithmList.css'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
-function AlgorithmList() {
+function AlgorithmList({ onShowHelp }) {
   const [algorithms, setAlgorithms] = useState([])
   const [categories, setCategories] = useState([])
   const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [focusedIndex, setFocusedIndex] = useState(null)
   const { favorites, toggleFavorite, isFavorite, recentlyViewed } = useSettings()
+  const navigate = useNavigate()
+  const searchInputRef = useRef(null)
+  const listRef = useRef(null)
 
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') || ''
@@ -80,6 +86,57 @@ function AlgorithmList() {
     return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
   }, [filteredAlgorithms])
 
+  // Reset focused index when filtered list changes
+  useEffect(() => {
+    setFocusedIndex(null)
+  }, [filteredAlgorithms.length, search, category, tag, difficulty, showFavoritesOnly])
+
+  // Scroll focused item into view
+  useEffect(() => {
+    if (focusedIndex !== null && focusedIndex >= 0) {
+      const focusedEl = document.querySelector(`[data-algo-index="${focusedIndex}"]`)
+      if (focusedEl) {
+        focusedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
+  }, [focusedIndex])
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    'j': () => {
+      if (filteredAlgorithms.length === 0) return
+      setFocusedIndex(prev =>
+        prev === null ? 0 : Math.min(prev + 1, filteredAlgorithms.length - 1)
+      )
+    },
+    'k': () => {
+      if (filteredAlgorithms.length === 0) return
+      setFocusedIndex(prev =>
+        prev === null ? 0 : Math.max(prev - 1, 0)
+      )
+    },
+    'Enter': () => {
+      if (focusedIndex !== null && filteredAlgorithms[focusedIndex]) {
+        navigate(`/algorithm/${filteredAlgorithms[focusedIndex].id}`)
+      }
+    },
+    '/': () => {
+      searchInputRef.current?.focus()
+    },
+    'f': () => {
+      if (focusedIndex !== null && filteredAlgorithms[focusedIndex]) {
+        toggleFavorite(filteredAlgorithms[focusedIndex].id)
+      }
+    },
+    '?': () => {
+      if (onShowHelp) onShowHelp()
+    },
+    'Escape': () => {
+      setFocusedIndex(null)
+      searchInputRef.current?.blur()
+    },
+  })
+
   const updateFilter = (key, value) => {
     const params = new URLSearchParams(searchParams)
     if (value) {
@@ -109,8 +166,9 @@ function AlgorithmList() {
       <div className="filters">
         <div className="search-box">
           <input
+            ref={searchInputRef}
             type="text"
-            placeholder="Search algorithms..."
+            placeholder="Search algorithms... (press / to focus)"
             value={search}
             onChange={(e) => updateFilter('search', e.target.value)}
             className="search-input"
@@ -172,6 +230,10 @@ function AlgorithmList() {
         Showing {filteredAlgorithms.length} of {algorithms.length} algorithms
       </div>
 
+      {!hasActiveFilters && (
+        <AlgorithmOfDay algorithms={algorithms} />
+      )}
+
       {!hasActiveFilters && recentlyViewed.length > 0 && (
         <div className="recently-viewed-section">
           <h2 className="recently-viewed-title">Recently Viewed</h2>
@@ -195,45 +257,56 @@ function AlgorithmList() {
           No algorithms match your filters.
         </div>
       ) : (
-        <div className="categories">
-          {groupedAlgorithms.map(([categoryName, algos]) => (
-            <div key={categoryName} className="category-group">
-              <h2 className="category-title">{categoryName}</h2>
-              <div className="algorithm-cards">
-                {algos.map(algo => (
-                  <div key={algo.id} className="algorithm-card-wrapper">
-                    <button
-                      className={`favorite-btn ${isFavorite(algo.id) ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        toggleFavorite(algo.id)
-                      }}
-                      title={isFavorite(algo.id) ? 'Remove from favorites' : 'Add to favorites'}
-                    >
-                      {isFavorite(algo.id) ? '\u2605' : '\u2606'}
-                    </button>
-                    <Link
-                      to={`/algorithm/${algo.id}`}
-                      className="algorithm-card"
-                    >
-                      <div className="card-header">
-                        <h3 className="card-title">{algo.name}</h3>
-                        <span className={`difficulty difficulty-${algo.difficulty.toLowerCase()}`}>
-                          {algo.difficulty}
-                        </span>
+        <div className="categories" ref={listRef}>
+          {(() => {
+            let flatIndex = 0
+            return groupedAlgorithms.map(([categoryName, algos]) => (
+              <div key={categoryName} className="category-group">
+                <h2 className="category-title">{categoryName}</h2>
+                <div className="algorithm-cards">
+                  {algos.map(algo => {
+                    const currentIndex = flatIndex++
+                    const isFocused = focusedIndex === currentIndex
+                    return (
+                      <div
+                        key={algo.id}
+                        className={`algorithm-card-wrapper ${isFocused ? 'focused' : ''}`}
+                        data-algo-index={currentIndex}
+                      >
+                        <button
+                          className={`favorite-btn ${isFavorite(algo.id) ? 'active' : ''}`}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            toggleFavorite(algo.id)
+                          }}
+                          title={isFavorite(algo.id) ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                          {isFavorite(algo.id) ? '\u2605' : '\u2606'}
+                        </button>
+                        <Link
+                          to={`/algorithm/${algo.id}`}
+                          className="algorithm-card"
+                        >
+                          <div className="card-header">
+                            <h3 className="card-title">{algo.name}</h3>
+                            <span className={`difficulty difficulty-${algo.difficulty.toLowerCase()}`}>
+                              {algo.difficulty}
+                            </span>
+                          </div>
+                          <p className="card-description">{algo.description}</p>
+                          <div className="card-tags">
+                            {algo.tags.slice(0, 4).map(t => (
+                              <span key={t} className="tag">{t}</span>
+                            ))}
+                          </div>
+                        </Link>
                       </div>
-                      <p className="card-description">{algo.description}</p>
-                      <div className="card-tags">
-                        {algo.tags.slice(0, 4).map(t => (
-                          <span key={t} className="tag">{t}</span>
-                        ))}
-                      </div>
-                    </Link>
-                  </div>
-                ))}
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          })()}
         </div>
       )}
     </div>
