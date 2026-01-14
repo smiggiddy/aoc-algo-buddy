@@ -155,6 +155,11 @@ function AlgorithmDetail({ onShowHelp }) {
               </div>
             )}
           </div>
+          {(id === 'bfs' || id === 'dfs') && (
+            <Link to={`/playground/${id}`} className="playground-btn">
+              Try in Playground
+            </Link>
+          )}
         </div>
       </div>
 

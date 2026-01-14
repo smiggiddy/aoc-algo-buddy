@@ -6,7 +6,9 @@ import AlgorithmDetail from './components/AlgorithmDetail'
 import SubmitForm from './components/SubmitForm'
 import Dashboard from './pages/Dashboard'
 import Compare from './pages/Compare'
+import Playground from './pages/Playground'
 import KeyboardHelpModal from './components/KeyboardHelpModal'
+import OfflineIndicator from './components/OfflineIndicator'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import './App.css'
 
@@ -35,11 +37,14 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/compare/:ids" element={<Compare />} />
+          <Route path="/playground" element={<Playground />} />
+          <Route path="/playground/:algorithmId" element={<Playground />} />
         </Routes>
       </main>
       {showKeyboardHelp && (
         <KeyboardHelpModal onClose={() => setShowKeyboardHelp(false)} />
       )}
+      <OfflineIndicator />
     </div>
   )
 }
