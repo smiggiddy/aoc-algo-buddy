@@ -19,7 +19,7 @@ function AlgorithmDetail({ onShowHelp }) {
   const [showAocExamples, setShowAocExamples] = useState(false)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const exportMenuRef = useRef(null)
-  const { toggleFavorite, isFavorite, spoilerPref, addRecentlyViewed } = useSettings()
+  const { toggleFavorite, isFavorite, spoilerPref, addRecentlyViewed, isLearned, toggleLearned } = useSettings()
 
   useEffect(() => {
     const fetchAlgorithm = async () => {
@@ -119,6 +119,13 @@ function AlgorithmDetail({ onShowHelp }) {
         </Link>
 
         <div className="header-actions">
+          <button
+            onClick={() => toggleLearned(id)}
+            className={`learned-btn ${isLearned(id) ? 'active' : ''}`}
+            title={isLearned(id) ? 'Mark as not learned' : 'Mark as learned'}
+          >
+            {isLearned(id) ? '\u2713 Learned' : 'Mark Learned'}
+          </button>
           <button
             onClick={() => toggleFavorite(id)}
             className={`favorite-detail-btn ${isFavorite(id) ? 'active' : ''}`}

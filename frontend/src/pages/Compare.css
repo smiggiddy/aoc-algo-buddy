@@ -1,0 +1,442 @@
+.compare-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.compare-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.compare-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.compare-subtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* Quick Compare Section */
+.quick-compare-section {
+  margin-bottom: 3rem;
+}
+
+.quick-compare-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.quick-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.quick-compare-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-compare-card:hover {
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+
+.quick-compare-card.active {
+  border-color: var(--accent);
+  background: rgba(0, 217, 255, 0.05);
+}
+
+.quick-compare-card h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.quick-compare-card p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.quick-compare-algos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.algo-chip {
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+}
+
+/* Custom Compare Section */
+.custom-compare-section {
+  margin-bottom: 2rem;
+}
+
+.custom-compare-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.custom-compare-header h2 {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.clear-selection-btn {
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-selection-btn:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+.selection-info {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.algorithm-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.selector-chip {
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selector-chip:hover:not(:disabled) {
+  border-color: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+.selector-chip.selected {
+  background: rgba(0, 217, 255, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.selector-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Comparison Section */
+.comparison-section {
+  margin-top: 2rem;
+}
+
+.comparison-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* Key Differences Table */
+.key-differences {
+  margin-bottom: 2rem;
+}
+
+.key-differences h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.differences-table {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.diff-header {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-bottom: 2px solid var(--border);
+}
+
+.diff-row {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.diff-row:last-child {
+  border-bottom: none;
+}
+
+.diff-cell {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.diff-cell.aspect-cell {
+  flex: 0 0 150px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.diff-cell.algo-header {
+  font-weight: 600;
+}
+
+.diff-cell.algo-header a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.diff-cell.algo-header a:hover {
+  text-decoration: underline;
+}
+
+/* Comparison Table */
+.comparison-table {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.comparison-header-row {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-bottom: 2px solid var(--border);
+}
+
+.comparison-row {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-row:last-child {
+  border-bottom: none;
+}
+
+.comparison-cell {
+  flex: 1;
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.comparison-cell.label-cell {
+  flex: 0 0 160px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.comparison-cell.algo-name-cell {
+  font-weight: 600;
+}
+
+.comparison-cell.algo-name-cell a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.comparison-cell.algo-name-cell a:hover {
+  text-decoration: underline;
+}
+
+.no-value {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.compare-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.compare-list li {
+  position: relative;
+  padding-left: 1rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.compare-list li::before {
+  content: '>';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.compare-list .more-items {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.compare-list .more-items::before {
+  content: '';
+}
+
+.compare-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.prereq-link {
+  padding: 0.2rem 0.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.prereq-link:hover {
+  background: var(--border);
+}
+
+/* Difficulty badges */
+.difficulty-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.difficulty-beginner {
+  background: rgba(0, 200, 83, 0.15);
+  color: #00c853;
+}
+
+.difficulty-intermediate {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.difficulty-advanced {
+  background: rgba(244, 67, 54, 0.15);
+  color: #f44336;
+}
+
+/* Pseudo Code Comparison */
+.pseudo-code-comparison {
+  margin-top: 2rem;
+}
+
+.pseudo-code-comparison h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.code-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.code-column {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-column h4 {
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.compare-code {
+  padding: 1rem;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.single-selection-msg {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .compare-page {
+    padding: 1rem;
+  }
+
+  .quick-compare-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diff-cell.aspect-cell,
+  .comparison-cell.label-cell {
+    flex: 0 0 100px;
+    font-size: 0.75rem;
+  }
+
+  .diff-cell,
+  .comparison-cell {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .code-grid {
+    grid-template-columns: 1fr;
+  }
+}

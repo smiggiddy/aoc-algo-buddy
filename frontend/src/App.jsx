@@ -4,6 +4,8 @@ import Header from './components/Header'
 import AlgorithmList from './components/AlgorithmList'
 import AlgorithmDetail from './components/AlgorithmDetail'
 import SubmitForm from './components/SubmitForm'
+import Dashboard from './pages/Dashboard'
+import Compare from './pages/Compare'
 import KeyboardHelpModal from './components/KeyboardHelpModal'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import './App.css'
@@ -30,6 +32,9 @@ function App() {
             element={<AlgorithmDetail onShowHelp={() => setShowKeyboardHelp(true)} />}
           />
           <Route path="/submit" element={<SubmitForm />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/compare" element={<Compare />} />
+          <Route path="/compare/:ids" element={<Compare />} />
         </Routes>
       </main>
       {showKeyboardHelp && (

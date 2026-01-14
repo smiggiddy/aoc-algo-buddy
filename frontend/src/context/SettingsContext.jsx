@@ -21,6 +21,8 @@ export function SettingsProvider({ children }) {
   const [spoilerPref, setSpoilerPref] = useLocalStorage('aoc-spoiler-pref', SPOILER_PREFS.ASK)
   const [theme, setTheme] = useLocalStorage('aoc-theme', THEMES.DARK)
   const [recentlyViewed, setRecentlyViewed] = useLocalStorage('aoc-recently-viewed', [])
+  const [learnedAlgorithms, setLearnedAlgorithms] = useLocalStorage('aoc-learned', [])
+  const [algorithmNotes, setAlgorithmNotes] = useLocalStorage('aoc-notes', {})
 
   // Apply theme to document root
   useEffect(() => {
@@ -55,6 +57,34 @@ export function SettingsProvider({ children }) {
     })
   }
 
+  const toggleLearned = (algorithmId) => {
+    setLearnedAlgorithms(prev => {
+      const existing = prev.find(item => item.id === algorithmId)
+      if (existing) {
+        return prev.filter(item => item.id !== algorithmId)
+      }
+      return [...prev, { id: algorithmId, learnedAt: new Date().toISOString() }]
+    })
+  }
+
+  const isLearned = (algorithmId) => {
+    return learnedAlgorithms.some(item => item.id === algorithmId)
+  }
+
+  const setNote = (algorithmId, note) => {
+    setAlgorithmNotes(prev => {
+      if (!note || note.trim() === '') {
+        const { [algorithmId]: _, ...rest } = prev
+        return rest
+      }
+      return { ...prev, [algorithmId]: note }
+    })
+  }
+
+  const getNote = (algorithmId) => {
+    return algorithmNotes[algorithmId] || ''
+  }
+
   const value = {
     favorites,
     toggleFavorite,
@@ -64,7 +94,13 @@ export function SettingsProvider({ children }) {
     theme,
     toggleTheme,
     recentlyViewed,
-    addRecentlyViewed
+    addRecentlyViewed,
+    learnedAlgorithms,
+    toggleLearned,
+    isLearned,
+    algorithmNotes,
+    setNote,
+    getNote
   }
 
   return (
