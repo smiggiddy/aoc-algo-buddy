@@ -20,13 +20,14 @@ function Playground() {
 
   // Generate engine when grid/start/goal/algorithm changes
   useEffect(() => {
-    if (algorithmInfo) {
-      const newEngine = algorithmInfo.createEngine(grid, start, goal)
+    const info = SUPPORTED_ALGORITHMS[selectedAlgo]
+    if (info) {
+      const newEngine = info.createEngine(grid, start, goal)
       setEngine(newEngine)
       setCurrentStep(0)
       setIsPlaying(false)
     }
-  }, [grid, start, goal, selectedAlgo, algorithmInfo])
+  }, [grid, start, goal, selectedAlgo])
 
   // Load example grid
   const loadExample = useCallback((exampleKey) => {
