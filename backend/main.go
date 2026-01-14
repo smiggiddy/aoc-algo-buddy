@@ -89,6 +89,88 @@ type Database struct {
 	captchaMu   sync.RWMutex
 }
 
+// RateLimiter provides simple rate limiting per IP
+type RateLimiter struct {
+	mu       sync.Mutex
+	requests map[string][]time.Time
+	limit    int           // max requests
+	window   time.Duration // time window
+}
+
+func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
+	rl := &RateLimiter{
+		requests: make(map[string][]time.Time),
+		limit:    limit,
+		window:   window,
+	}
+	// Cleanup old entries periodically
+	go func() {
+		for {
+			time.Sleep(window)
+			rl.cleanup()
+		}
+	}()
+	return rl
+}
+
+func (rl *RateLimiter) cleanup() {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+	now := time.Now()
+	for ip, times := range rl.requests {
+		var valid []time.Time
+		for _, t := range times {
+			if now.Sub(t) < rl.window {
+				valid = append(valid, t)
+			}
+		}
+		if len(valid) == 0 {
+			delete(rl.requests, ip)
+		} else {
+			rl.requests[ip] = valid
+		}
+	}
+}
+
+func (rl *RateLimiter) Allow(ip string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	now := time.Now()
+	times := rl.requests[ip]
+
+	// Filter to only requests within the window
+	var valid []time.Time
+	for _, t := range times {
+		if now.Sub(t) < rl.window {
+			valid = append(valid, t)
+		}
+	}
+
+	if len(valid) >= rl.limit {
+		return false
+	}
+
+	rl.requests[ip] = append(valid, now)
+	return true
+}
+
+// Rate limiters for different endpoints
+var (
+	submitLimiter = NewRateLimiter(5, time.Minute)       // 5 submissions per minute
+	adminLimiter  = NewRateLimiter(10, time.Minute)      // 10 admin attempts per minute
+	apiLimiter    = NewRateLimiter(100, time.Minute)     // 100 API requests per minute
+)
+
+// Maximum sizes for input validation
+const (
+	maxNameLength        = 200
+	maxDescriptionLength = 5000
+	maxPseudoCodeLength  = 50000
+	maxFieldLength       = 1000
+	maxArrayLength       = 50
+)
+
 var db *Database
 
 // Admin credentials (set via environment variables)
@@ -356,8 +438,8 @@ func main() {
 	// Serve static files for production
 	mux.HandleFunc("/", handleStatic)
 
-	// Middleware chain: logging -> CORS -> handler
-	handler := loggingMiddleware(corsMiddleware(mux))
+	// Middleware chain: logging -> security headers -> rate limit -> CORS -> handler
+	handler := loggingMiddleware(securityHeadersMiddleware(rateLimitMiddleware(apiLimiter)(corsMiddleware(mux))))
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -368,7 +450,12 @@ func main() {
 	if dataDir != "" {
 		log.Printf("Data directory: %s", dataDir)
 	}
-	log.Printf("Admin credentials: %s / %s", adminUser, strings.Repeat("*", len(adminPass)))
+
+	// Security warning for default credentials
+	if adminPass == "changeme" {
+		log.Println("WARNING: Using default admin password! Set ADMIN_PASS environment variable for production.")
+	}
+
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
@@ -399,9 +486,28 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
+func securityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		// Security headers
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		w.Header().Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+
+		// Content Security Policy - adjust as needed for your frontend
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	// Get allowed origin from environment, default to * for development
+	allowedOrigin := getEnv("CORS_ORIGIN", "*")
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
@@ -414,8 +520,49 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func rateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ip := r.Header.Get("X-Forwarded-For")
+			if ip == "" {
+				ip = r.RemoteAddr
+			}
+			// Take first IP if multiple are present
+			if idx := strings.Index(ip, ","); idx != -1 {
+				ip = strings.TrimSpace(ip[:idx])
+			}
+
+			if !limiter.Allow(ip) {
+				http.Error(w, "Rate limit exceeded. Please try again later.", http.StatusTooManyRequests)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// getClientIP extracts the client IP from the request
+func getClientIP(r *http.Request) string {
+	ip := r.Header.Get("X-Forwarded-For")
+	if ip == "" {
+		ip = r.RemoteAddr
+	}
+	if idx := strings.Index(ip, ","); idx != -1 {
+		ip = strings.TrimSpace(ip[:idx])
+	}
+	return ip
+}
+
 func adminAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Rate limit admin login attempts to prevent brute force
+		ip := getClientIP(r)
+		if !adminLimiter.Allow(ip) {
+			http.Error(w, "Too many login attempts. Please try again later.", http.StatusTooManyRequests)
+			return
+		}
+
 		user, pass, ok := r.BasicAuth()
 		if !ok {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Admin"`)
@@ -584,6 +731,16 @@ func handleSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Rate limit submissions
+	ip := getClientIP(r)
+	if !submitLimiter.Allow(ip) {
+		http.Error(w, "Too many submissions. Please try again later.", http.StatusTooManyRequests)
+		return
+	}
+
+	// Limit request body size (1MB max)
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+
 	var req SubmitRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -600,6 +757,28 @@ func handleSubmit(w http.ResponseWriter, r *http.Request) {
 	if req.Algorithm.Name == "" || req.Algorithm.Category == "" ||
 		req.Algorithm.Description == "" || req.Algorithm.PseudoCode == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	// Validate field lengths to prevent abuse
+	if len(req.Algorithm.Name) > maxNameLength {
+		http.Error(w, "Name exceeds maximum length", http.StatusBadRequest)
+		return
+	}
+	if len(req.Algorithm.Description) > maxDescriptionLength {
+		http.Error(w, "Description exceeds maximum length", http.StatusBadRequest)
+		return
+	}
+	if len(req.Algorithm.PseudoCode) > maxPseudoCodeLength {
+		http.Error(w, "Pseudo code exceeds maximum length", http.StatusBadRequest)
+		return
+	}
+	if len(req.Algorithm.Tags) > maxArrayLength {
+		http.Error(w, "Too many tags", http.StatusBadRequest)
+		return
+	}
+	if len(req.Algorithm.WhenToUse) > maxArrayLength {
+		http.Error(w, "Too many 'when to use' items", http.StatusBadRequest)
 		return
 	}
 
