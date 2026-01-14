@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from 'react'
+import { createContext, useContext, useEffect, useCallback, useMemo } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 
 const SettingsContext = createContext(null)
@@ -29,24 +29,24 @@ export function SettingsProvider({ children }) {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(prev => prev === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK)
-  }
+  }, [setTheme])
 
-  const toggleFavorite = (algorithmId) => {
+  const toggleFavorite = useCallback((algorithmId) => {
     setFavorites(prev => {
       if (prev.includes(algorithmId)) {
         return prev.filter(id => id !== algorithmId)
       }
       return [...prev, algorithmId]
     })
-  }
+  }, [setFavorites])
 
-  const isFavorite = (algorithmId) => {
+  const isFavorite = useCallback((algorithmId) => {
     return favorites.includes(algorithmId)
-  }
+  }, [favorites])
 
-  const addRecentlyViewed = (algorithmId, algorithmName) => {
+  const addRecentlyViewed = useCallback((algorithmId, algorithmName) => {
     setRecentlyViewed(prev => {
       // Remove if already exists
       const filtered = prev.filter(item => item.id !== algorithmId)
@@ -55,9 +55,9 @@ export function SettingsProvider({ children }) {
       // Keep only the most recent
       return newRecent.slice(0, MAX_RECENT_ALGORITHMS)
     })
-  }
+  }, [setRecentlyViewed])
 
-  const toggleLearned = (algorithmId) => {
+  const toggleLearned = useCallback((algorithmId) => {
     setLearnedAlgorithms(prev => {
       const existing = prev.find(item => item.id === algorithmId)
       if (existing) {
@@ -65,13 +65,13 @@ export function SettingsProvider({ children }) {
       }
       return [...prev, { id: algorithmId, learnedAt: new Date().toISOString() }]
     })
-  }
+  }, [setLearnedAlgorithms])
 
-  const isLearned = (algorithmId) => {
+  const isLearned = useCallback((algorithmId) => {
     return learnedAlgorithms.some(item => item.id === algorithmId)
-  }
+  }, [learnedAlgorithms])
 
-  const setNote = (algorithmId, note) => {
+  const setNote = useCallback((algorithmId, note) => {
     setAlgorithmNotes(prev => {
       if (!note || note.trim() === '') {
         const { [algorithmId]: _, ...rest } = prev
@@ -79,13 +79,13 @@ export function SettingsProvider({ children }) {
       }
       return { ...prev, [algorithmId]: note }
     })
-  }
+  }, [setAlgorithmNotes])
 
-  const getNote = (algorithmId) => {
+  const getNote = useCallback((algorithmId) => {
     return algorithmNotes[algorithmId] || ''
-  }
+  }, [algorithmNotes])
 
-  const value = {
+  const value = useMemo(() => ({
     favorites,
     toggleFavorite,
     isFavorite,
@@ -101,7 +101,23 @@ export function SettingsProvider({ children }) {
     algorithmNotes,
     setNote,
     getNote
-  }
+  }), [
+    favorites,
+    toggleFavorite,
+    isFavorite,
+    spoilerPref,
+    setSpoilerPref,
+    theme,
+    toggleTheme,
+    recentlyViewed,
+    addRecentlyViewed,
+    learnedAlgorithms,
+    toggleLearned,
+    isLearned,
+    algorithmNotes,
+    setNote,
+    getNote
+  ])
 
   return (
     <SettingsContext.Provider value={value}>
