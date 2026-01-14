@@ -477,13 +477,25 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		wrapped := &responseWriter{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(wrapped, r)
 
-		ip := r.Header.Get("X-Forwarded-For")
-		if ip == "" {
-			ip = r.RemoteAddr
-		}
+		ip := getClientIP(r)
+		userAgent := r.Header.Get("User-Agent")
+		cfRay := r.Header.Get("CF-Ray") // Cloudflare Ray ID for request tracing
 
-		log.Printf("%s %s %s %d %s", ip, r.Method, r.URL.Path, wrapped.status, time.Since(start))
+		// Enhanced logging with optional Cloudflare tracing
+		if cfRay != "" {
+			log.Printf("%s %s %s %d %s [ray:%s] [ua:%s]", ip, r.Method, r.URL.Path, wrapped.status, time.Since(start), cfRay, truncateUA(userAgent))
+		} else {
+			log.Printf("%s %s %s %d %s [ua:%s]", ip, r.Method, r.URL.Path, wrapped.status, time.Since(start), truncateUA(userAgent))
+		}
 	})
+}
+
+// truncateUA truncates User-Agent to a reasonable length for logging
+func truncateUA(ua string) string {
+	if len(ua) > 100 {
+		return ua[:100] + "..."
+	}
+	return ua
 }
 
 func securityHeadersMiddleware(next http.Handler) http.Handler {
@@ -523,14 +535,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 func rateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := r.Header.Get("X-Forwarded-For")
-			if ip == "" {
-				ip = r.RemoteAddr
-			}
-			// Take first IP if multiple are present
-			if idx := strings.Index(ip, ","); idx != -1 {
-				ip = strings.TrimSpace(ip[:idx])
-			}
+			ip := getClientIP(r)
 
 			if !limiter.Allow(ip) {
 				http.Error(w, "Rate limit exceeded. Please try again later.", http.StatusTooManyRequests)
@@ -542,14 +547,40 @@ func rateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
 	}
 }
 
-// getClientIP extracts the client IP from the request
+// clientIPHeaders defines the priority order for client IP detection.
+// Headers are checked in order, with the first non-empty value used.
+var clientIPHeaders = []string{
+	"CF-Connecting-IP", // Cloudflare
+	"True-Client-IP",   // Cloudflare Enterprise / Akamai
+	"X-Real-IP",        // Nginx proxy
+	"X-Forwarded-For",  // Standard proxy header (may contain comma-separated list)
+}
+
+// getClientIP extracts the client IP from the request, checking various
+// proxy headers in priority order before falling back to RemoteAddr.
 func getClientIP(r *http.Request) string {
-	ip := r.Header.Get("X-Forwarded-For")
-	if ip == "" {
-		ip = r.RemoteAddr
+	for _, header := range clientIPHeaders {
+		if ip := r.Header.Get(header); ip != "" {
+			// X-Forwarded-For can contain multiple IPs; take the first (client) IP
+			if idx := strings.Index(ip, ","); idx != -1 {
+				ip = strings.TrimSpace(ip[:idx])
+			}
+			return strings.TrimSpace(ip)
+		}
 	}
-	if idx := strings.Index(ip, ","); idx != -1 {
-		ip = strings.TrimSpace(ip[:idx])
+
+	// Fallback to RemoteAddr, stripping port if present
+	ip := r.RemoteAddr
+	if idx := strings.LastIndex(ip, ":"); idx != -1 {
+		// Check if this is IPv6 (contains multiple colons)
+		if strings.Count(ip, ":") > 1 {
+			// IPv6 address - check for bracket notation [::1]:port
+			if bracketIdx := strings.LastIndex(ip, "]"); bracketIdx != -1 {
+				ip = ip[1:bracketIdx] // Remove brackets
+			}
+		} else {
+			ip = ip[:idx] // IPv4 - just remove port
+		}
 	}
 	return ip
 }
