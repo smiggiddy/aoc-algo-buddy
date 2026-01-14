@@ -1,5 +1,7 @@
-export { BFSEngine, createBFSEngine } from './bfsEngine'
-export { DFSEngine, createDFSEngine } from './dfsEngine'
+import { BFSEngine, createBFSEngine } from './bfsEngine'
+import { DFSEngine, createDFSEngine } from './dfsEngine'
+
+export { BFSEngine, createBFSEngine, DFSEngine, createDFSEngine }
 
 // Default example grids
 export const EXAMPLE_GRIDS = {
