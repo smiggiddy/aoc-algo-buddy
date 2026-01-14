@@ -21,6 +21,10 @@ function AlgorithmDetail({ onShowHelp }) {
   const exportMenuRef = useRef(null)
   const { toggleFavorite, isFavorite, spoilerPref, addRecentlyViewed, isLearned, toggleLearned } = useSettings()
 
+  // Use ref to avoid addRecentlyViewed in useEffect dependencies
+  const addRecentlyViewedRef = useRef(addRecentlyViewed)
+  addRecentlyViewedRef.current = addRecentlyViewed
+
   useEffect(() => {
     const fetchAlgorithm = async () => {
       try {
@@ -32,7 +36,7 @@ function AlgorithmDetail({ onShowHelp }) {
         setAlgorithm(data)
         setLoading(false)
         // Track recently viewed
-        addRecentlyViewed(data.id, data.name)
+        addRecentlyViewedRef.current(data.id, data.name)
       } catch (err) {
         setError(err.message)
         setLoading(false)
@@ -40,7 +44,7 @@ function AlgorithmDetail({ onShowHelp }) {
     }
 
     fetchAlgorithm()
-  }, [id, addRecentlyViewed])
+  }, [id])
 
   const copyLink = async () => {
     try {
