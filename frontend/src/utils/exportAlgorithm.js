@@ -1,4 +1,30 @@
 /**
+ * Escape HTML entities to prevent XSS attacks
+ */
+function escapeHtml(text) {
+  if (!text) return ''
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+/**
+ * Escape URL for safe use in href attributes
+ */
+function escapeUrl(url) {
+  if (!url) return ''
+  // Only allow http, https, and mailto protocols
+  const trimmed = String(url).trim()
+  if (!/^(https?:|mailto:)/i.test(trimmed)) {
+    return ''
+  }
+  return encodeURI(trimmed)
+}
+
+/**
  * Generate a clean Markdown representation of an algorithm
  */
 export function generateMarkdown(algorithm) {
@@ -124,14 +150,36 @@ export function downloadAsMarkdown(algorithm) {
 
 /**
  * Generate printable HTML for PDF export
+ * All user-controlled content is escaped to prevent XSS attacks
  */
 export function generatePrintableHTML(algorithm) {
+  // Escape all user-controlled fields
+  const name = escapeHtml(algorithm.name)
+  const category = escapeHtml(algorithm.category)
+  const difficulty = escapeHtml(algorithm.difficulty)
+  const description = escapeHtml(algorithm.description)
+  const keyInsight = escapeHtml(algorithm.keyInsight)
+  const pseudoCode = escapeHtml(algorithm.pseudoCode)
+  const timeComplexity = escapeHtml(algorithm.complexity?.time)
+  const spaceComplexity = escapeHtml(algorithm.complexity?.space)
+
+  // Escape arrays
+  const tags = (algorithm.tags || []).map(escapeHtml)
+  const recognitionHints = (algorithm.recognitionHints || []).map(escapeHtml)
+  const whenToUse = (algorithm.whenToUse || []).map(escapeHtml)
+  const commonPitfalls = (algorithm.commonPitfalls || []).map(escapeHtml)
+  const relatedAlgos = (algorithm.relatedAlgos || []).map(escapeHtml)
+  const resources = (algorithm.resources || []).map(r => ({
+    display: escapeHtml(r),
+    href: escapeUrl(r)
+  }))
+
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>${algorithm.name} - AoC Algo Buddy</title>
+  <title>${name} - AoC Algo Buddy</title>
   <style>
     * {
       box-sizing: border-box;
@@ -237,72 +285,72 @@ export function generatePrintableHTML(algorithm) {
   </style>
 </head>
 <body>
-  <h1>${algorithm.name}</h1>
+  <h1>${name}</h1>
 
   <div class="meta">
-    <span class="badge category">${algorithm.category}</span>
-    <span class="badge difficulty-${algorithm.difficulty.toLowerCase()}">${algorithm.difficulty}</span>
+    <span class="badge category">${category}</span>
+    <span class="badge difficulty-${escapeHtml(algorithm.difficulty?.toLowerCase())}">${difficulty}</span>
   </div>
 
   <div class="tags">
-    ${algorithm.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+    ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
   </div>
 
   <h2>Description</h2>
-  <p>${algorithm.description}</p>
+  <p>${description}</p>
 
-  ${algorithm.keyInsight ? `
+  ${keyInsight ? `
   <h2>Key Insight</h2>
-  <blockquote>${algorithm.keyInsight}</blockquote>
+  <blockquote>${keyInsight}</blockquote>
   ` : ''}
 
-  ${algorithm.recognitionHints && algorithm.recognitionHints.length > 0 ? `
+  ${recognitionHints.length > 0 ? `
   <h2>How to Recognize</h2>
   <ul>
-    ${algorithm.recognitionHints.map(hint => `<li>${hint}</li>`).join('')}
+    ${recognitionHints.map(hint => `<li>${hint}</li>`).join('')}
   </ul>
   ` : ''}
 
-  ${algorithm.whenToUse && algorithm.whenToUse.length > 0 ? `
+  ${whenToUse.length > 0 ? `
   <h2>When to Use</h2>
   <ul>
-    ${algorithm.whenToUse.map(use => `<li>${use}</li>`).join('')}
+    ${whenToUse.map(use => `<li>${use}</li>`).join('')}
   </ul>
   ` : ''}
 
   <h2>Pseudo Code</h2>
-  <pre>${algorithm.pseudoCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+  <pre>${pseudoCode}</pre>
 
   <h2>Complexity</h2>
   <div class="complexity">
     <div class="complexity-item">
       <span class="complexity-label">Time:</span>
-      <span>${algorithm.complexity.time}</span>
+      <span>${timeComplexity}</span>
     </div>
     <div class="complexity-item">
       <span class="complexity-label">Space:</span>
-      <span>${algorithm.complexity.space}</span>
+      <span>${spaceComplexity}</span>
     </div>
   </div>
 
-  ${algorithm.commonPitfalls && algorithm.commonPitfalls.length > 0 ? `
+  ${commonPitfalls.length > 0 ? `
   <h2>Common Pitfalls</h2>
   <ul>
-    ${algorithm.commonPitfalls.map(pitfall => `<li>${pitfall}</li>`).join('')}
+    ${commonPitfalls.map(pitfall => `<li>${pitfall}</li>`).join('')}
   </ul>
   ` : ''}
 
-  ${algorithm.relatedAlgos && algorithm.relatedAlgos.length > 0 ? `
+  ${relatedAlgos.length > 0 ? `
   <h2>Related Algorithms</h2>
   <ul>
-    ${algorithm.relatedAlgos.map(related => `<li>${related}</li>`).join('')}
+    ${relatedAlgos.map(related => `<li>${related}</li>`).join('')}
   </ul>
   ` : ''}
 
-  ${algorithm.resources && algorithm.resources.length > 0 ? `
+  ${resources.length > 0 ? `
   <h2>Resources</h2>
   <ul>
-    ${algorithm.resources.map(resource => `<li><a href="${resource}">${resource}</a></li>`).join('')}
+    ${resources.map(r => r.href ? `<li><a href="${r.href}">${r.display}</a></li>` : `<li>${r.display}</li>`).join('')}
   </ul>
   ` : ''}
 
