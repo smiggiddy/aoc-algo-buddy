@@ -59,6 +59,28 @@
   background: rgba(255, 193, 7, 0.1);
 }
 
+.learned-btn {
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.learned-btn:hover {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.learned-btn.active {
+  color: var(--success);
+  border-color: var(--success);
+  background: rgba(0, 200, 83, 0.1);
+}
+
 .spoiler-hidden-msg {
   color: var(--text-muted);
   font-style: italic;
@@ -112,6 +134,23 @@
 .export-btn:hover {
   background: var(--accent-dim);
   border-color: var(--accent-dim);
+}
+
+.playground-btn {
+  padding: 0.5rem 1rem;
+  background: var(--success);
+  border: 1px solid var(--success);
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.playground-btn:hover {
+  background: #00a844;
+  border-color: #00a844;
 }
 
 .export-dropdown {

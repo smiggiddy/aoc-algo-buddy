@@ -46,6 +46,12 @@ function Header() {
           </p>
         </div>
         <nav className="header-nav">
+          <Link to="/dashboard" className="nav-link dashboard-btn">
+            Dashboard
+          </Link>
+          <Link to="/compare" className="nav-link compare-btn">
+            Compare
+          </Link>
           <Link to="/submit" className="nav-link contribute-btn">
             + Contribute
           </Link>
