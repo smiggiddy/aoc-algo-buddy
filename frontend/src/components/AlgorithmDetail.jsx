@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useSettings, SPOILER_PREFS } from '../context/SettingsContext'
 import './AlgorithmDetail.css'
 import SpoilerDialog from './SpoilerDialog'
+import PseudoCodeBlock from './PseudoCodeBlock'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
@@ -14,7 +15,7 @@ function AlgorithmDetail() {
   const [copied, setCopied] = useState(false)
   const [showSpoilerDialog, setShowSpoilerDialog] = useState(false)
   const [showAocExamples, setShowAocExamples] = useState(false)
-  const { toggleFavorite, isFavorite, spoilerPref } = useSettings()
+  const { toggleFavorite, isFavorite, spoilerPref, addRecentlyViewed } = useSettings()
 
   useEffect(() => {
     const fetchAlgorithm = async () => {
@@ -26,6 +27,8 @@ function AlgorithmDetail() {
         const data = await res.json()
         setAlgorithm(data)
         setLoading(false)
+        // Track recently viewed
+        addRecentlyViewed(data.id, data.name)
       } catch (err) {
         setError(err.message)
         setLoading(false)
@@ -33,7 +36,7 @@ function AlgorithmDetail() {
     }
 
     fetchAlgorithm()
-  }, [id])
+  }, [id, addRecentlyViewed])
 
   const copyLink = async () => {
     try {
@@ -140,9 +143,7 @@ function AlgorithmDetail() {
 
         <section className="section">
           <h2 className="section-title">Pseudo Code</h2>
-          <div className="code-block">
-            <pre><code>{algorithm.pseudoCode}</code></pre>
-          </div>
+          <PseudoCodeBlock code={algorithm.pseudoCode} />
         </section>
 
         <section className="section">

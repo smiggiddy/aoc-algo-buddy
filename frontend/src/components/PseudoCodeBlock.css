@@ -1,0 +1,152 @@
+.pseudo-code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  min-height: 42px;
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.selection-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.clear-selection-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-selection-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.copy-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.copy-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.copy-all-btn {
+  background: var(--bg-tertiary);
+}
+
+.code-container {
+  overflow-x: auto;
+}
+
+.code-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.code-line {
+  transition: background-color 0.1s;
+}
+
+.code-line:hover {
+  background: var(--code-line-hover);
+}
+
+.code-line.selected {
+  background: var(--code-line-selected);
+}
+
+.code-line.selected:hover {
+  background: var(--code-line-selected);
+}
+
+.line-number {
+  width: 1%;
+  min-width: 50px;
+  padding: 0 1rem;
+  text-align: right;
+  color: var(--line-number);
+  user-select: none;
+  cursor: pointer;
+  vertical-align: top;
+  border-right: 1px solid var(--border);
+  transition: color 0.2s;
+}
+
+.line-number:hover {
+  color: var(--accent);
+}
+
+.code-line.selected .line-number {
+  color: var(--accent);
+}
+
+.line-content {
+  padding: 0 1rem;
+  white-space: pre;
+}
+
+.line-content pre {
+  margin: 0;
+  display: inline;
+}
+
+.line-content code {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .code-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .copy-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .line-number {
+    min-width: 40px;
+    padding: 0 0.5rem;
+  }
+
+  .line-content {
+    padding: 0 0.5rem;
+  }
+}
