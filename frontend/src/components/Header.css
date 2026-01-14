@@ -70,6 +70,22 @@
   transform: translateY(-1px);
 }
 
+/* Theme Toggle */
+.theme-toggle-btn {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* Settings */
 .settings-wrapper {
   position: relative;

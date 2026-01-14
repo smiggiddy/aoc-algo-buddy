@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useSettings, SPOILER_PREFS } from '../context/SettingsContext'
+import { useSettings, SPOILER_PREFS, THEMES } from '../context/SettingsContext'
 import './Header.css'
 
 function Header() {
   const [showSettings, setShowSettings] = useState(false)
-  const { spoilerPref, setSpoilerPref, favorites } = useSettings()
+  const { spoilerPref, setSpoilerPref, favorites, theme, toggleTheme } = useSettings()
 
   return (
     <header className="header">
@@ -23,6 +23,13 @@ function Header() {
           <Link to="/submit" className="nav-link contribute-btn">
             + Contribute
           </Link>
+          <button
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            title={theme === THEMES.DARK ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === THEMES.DARK ? '\u2600' : '\u263D'}
+          </button>
           <div className="settings-wrapper">
             <button
               className="settings-btn"

@@ -116,6 +116,65 @@
   font-size: 0.875rem;
 }
 
+/* Recently Viewed */
+.recently-viewed-section {
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.recently-viewed-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recently-viewed-title::before {
+  content: '\231A';
+  color: var(--accent);
+}
+
+.recently-viewed-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recently-viewed-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.recently-viewed-item:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.recent-icon {
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
+.recent-name {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Categories */
 .categories {
   display: flex;

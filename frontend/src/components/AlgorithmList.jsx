@@ -11,7 +11,7 @@ function AlgorithmList() {
   const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { favorites, toggleFavorite, isFavorite } = useSettings()
+  const { favorites, toggleFavorite, isFavorite, recentlyViewed } = useSettings()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') || ''
@@ -171,6 +171,24 @@ function AlgorithmList() {
       <div className="results-info">
         Showing {filteredAlgorithms.length} of {algorithms.length} algorithms
       </div>
+
+      {!hasActiveFilters && recentlyViewed.length > 0 && (
+        <div className="recently-viewed-section">
+          <h2 className="recently-viewed-title">Recently Viewed</h2>
+          <div className="recently-viewed-list">
+            {recentlyViewed.map(item => (
+              <Link
+                key={item.id}
+                to={`/algorithm/${item.id}`}
+                className="recently-viewed-item"
+              >
+                <span className="recent-icon">{'\u2022'}</span>
+                <span className="recent-name">{item.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {groupedAlgorithms.length === 0 ? (
         <div className="no-results">
