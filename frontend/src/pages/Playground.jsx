@@ -261,7 +261,7 @@ function Playground() {
               disabled={!engine || currentStep >= engine.totalSteps - 1}
               title={isPlaying ? 'Pause' : 'Play'}
             >
-              {isPlaying ? '&#10074;&#10074;' : '&#9658;'}
+              {isPlaying ? '\u275A\u275A' : '\u25B6'}
             </button>
             <button
               onClick={stepForward}
